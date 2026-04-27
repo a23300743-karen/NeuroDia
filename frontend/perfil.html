@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroDia — Mi Perfil</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/neurodia.png" alt="NeuroDia">
+      <span>NeuroDia</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="perfil.html" class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Mi Perfil
+      </a>
+      <a href="monitoreo.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Monitoreo Diario
+      </a>
+      <a href="historial.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Mi Historial
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="sidebar-avatar">--</div>
+        <div class="user-info">
+          <span id="sidebar-nombre">Cargando...</span>
+          <span class="user-role">Paciente</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Mi Perfil</h1>
+        <p class="page-subtitle">Datos clínicos e información personal</p>
+      </div>
+      <div class="header-actions">
+        <span id="estado-aprobacion" class="badge-status badge-pending">Pendiente de aprobación</span>
+      </div>
+    </header>
+
+    <!-- Alert -->
+    <div id="page-alert" class="page-alert" style="display:none"></div>
+    <div id="page-success" class="page-alert page-alert-success" style="display:none"></div>
+
+    <!-- Loading -->
+    <div id="loading-state" class="loading-state">
+      <svg class="spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      <span>Cargando perfil...</span>
+    </div>
+
+    <!-- Contenido del perfil -->
+    <div id="perfil-content" style="display:none">
+
+      <!-- Tarjeta resumen -->
+      <div class="profile-hero">
+        <div class="profile-avatar-lg" id="hero-avatar">--</div>
+        <div class="profile-hero-info">
+          <h2 id="hero-nombre">—</h2>
+          <p id="hero-email" class="text-muted">—</p>
+          <div class="hero-tags" id="hero-tags"></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box">
+            <span class="stat-val" id="stat-hba1c">—</span>
+            <span class="stat-lbl">HbA1c %</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-val" id="stat-anios">—</span>
+            <span class="stat-lbl">Años diagnóstico</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-val" id="stat-registros">—</span>
+            <span class="stat-lbl">Registros totales</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-val" id="stat-adherencia">—</span>
+            <span class="stat-lbl">Adherencia</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de edición -->
+      <div class="cards-grid">
+
+        <!-- Datos personales -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Datos personales</h3>
+            <button class="btn-edit" id="btn-edit-personal" onclick="toggleEdit('personal')">Editar</button>
+          </div>
+          <form id="form-personal">
+            <div class="two-col">
+              <div class="field-group">
+                <label>Nombre(s)</label>
+                <input type="text" id="p-nombre" disabled>
+              </div>
+              <div class="field-group">
+                <label>Apellidos</label>
+                <input type="text" id="p-apellidos" disabled>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <label>Fecha de nacimiento</label>
+                <input type="date" id="p-nacimiento" disabled>
+              </div>
+              <div class="field-group">
+                <label>Sexo</label>
+                <select id="p-sexo" disabled>
+                  <option value="">Sin especificar</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <label>CURP</label>
+                <input type="text" id="p-curp" disabled maxlength="18" style="text-transform:uppercase">
+              </div>
+              <div class="field-group">
+                <label>Teléfono</label>
+                <input type="text" id="p-telefono" disabled>
+              </div>
+            </div>
+            <div class="form-actions" id="actions-personal" style="display:none">
+              <button type="button" class="btn-cancel" onclick="cancelEdit('personal')">Cancelar</button>
+              <button type="button" class="btn-save" onclick="savePersonal()">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Datos clínicos -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Datos clínicos</h3>
+            <button class="btn-edit" id="btn-edit-clinico" onclick="toggleEdit('clinico')">Editar</button>
+          </div>
+          <form id="form-clinico">
+            <div class="two-col">
+              <div class="field-group">
+                <label>Tipo de diabetes</label>
+                <select id="p-diabetes" disabled>
+                  <option value="tipo_1">Tipo I</option>
+                  <option value="tipo_2">Tipo II</option>
+                  <option value="gestacional">Gestacional</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Años con diagnóstico</label>
+                <input type="number" id="p-anios" min="0" max="80" disabled>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-group">
+                <label>HbA1c (%)</label>
+                <input type="number" id="p-hba1c" step="0.1" min="3" max="20" disabled>
+              </div>
+              <div class="field-group">
+                <label>Grupo de estudio</label>
+                <input type="text" id="p-grupo" disabled>
+              </div>
+            </div>
+            <div class="form-actions" id="actions-clinico" style="display:none">
+              <button type="button" class="btn-cancel" onclick="cancelEdit('clinico')">Cancelar</button>
+              <button type="button" class="btn-save" onclick="saveClinicos()">Guardar cambios</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Comorbilidades -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Comorbilidades</h3>
+            <button class="btn-edit" onclick="toggleAddComorbilidad()">+ Agregar</button>
+          </div>
+          <div id="add-comorbilidad-form" style="display:none;margin-bottom:12px">
+            <div style="display:flex;gap:8px">
+              <input type="text" id="nueva-comorbilidad" placeholder="Ej. Hipertensión arterial" class="inline-input">
+              <button class="btn-save" style="white-space:nowrap" onclick="addComorbilidad()">Agregar</button>
+            </div>
+          </div>
+          <div id="comorbilidades-list">
+            <p class="empty-state">Sin comorbilidades registradas.</p>
+          </div>
+        </div>
+
+        <!-- Medicamentos -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Medicamentos actuales</h3>
+            <button class="btn-edit" onclick="toggleAddMedicamento()">+ Agregar</button>
+          </div>
+          <div id="add-med-form" style="display:none;margin-bottom:12px">
+            <div class="two-col" style="margin-bottom:8px">
+              <input type="text" id="med-nombre" placeholder="Nombre del medicamento" class="inline-input">
+              <input type="text" id="med-dosis" placeholder="Dosis (ej. 850mg)" class="inline-input">
+            </div>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="med-frecuencia" placeholder="Frecuencia (ej. c/12h)" class="inline-input" style="flex:1">
+              <button class="btn-save" onclick="addMedicamento()">Agregar</button>
+            </div>
+          </div>
+          <div id="medicamentos-list">
+            <p class="empty-state">Sin medicamentos registrados.</p>
+          </div>
+        </div>
+
+      </div><!-- /cards-grid -->
+    </div><!-- /perfil-content -->
+
+  </main>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/perfil.js"></script>
+</body>
+</html>

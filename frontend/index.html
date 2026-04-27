@@ -4,23 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NeuroDia — Acceso</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="split-layout">
 
-  <!-- PANEL IZQUIERDO -->
+  <!-- PANEL IZQUIERDO — Branding -->
   <aside class="brand-panel">
     <div class="brand-inner">
       <div class="brand-logo">
-        <img src="neurodia.png" alt="NeuroDia logo">
+        <img src="assets/neurodia.png" alt="NeuroDia logo">
         <span class="brand-name">NeuroDia</span>
       </div>
   </aside>
 
-  <!-- PANEL DERECHO -->
+  <!-- PANEL DERECHO — Formularios -->
   <main class="form-panel">
 
     <!-- Tabs -->
@@ -169,6 +169,12 @@
           <span class="field-error" id="err-reg-terms"></span>
         </div>
 
+        <div class="field-group" id="group-cedula" style="display:none">
+          <label for="reg-cedula">Cédula Profesional</label>
+            <input type="text" id="reg-cedula" placeholder="12345678">
+          <span class="field-error" id="err-reg-cedula"></span>
+        </div>
+
         <button type="submit" class="btn-primary" id="reg-btn">
           <span class="btn-text">Crear cuenta</span>
           <span class="btn-loader" style="display:none">
@@ -183,6 +189,6 @@
   </main>
 </div>
 
-<script src="login.js"></script>
+<script src="js/login.js"></script>
 </body>
 </html>
