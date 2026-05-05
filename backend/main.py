@@ -214,12 +214,17 @@ async def get_current_user(
     exc = HTTPException(status_code=401, detail="Token inválido o expirado",
                         headers={"WWW-Authenticate": "Bearer"})
     try:
+        print(f"TOKEN RECIBIDO: {token}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = int(payload.get("sub"))
-        if user_id is None: raise exc
-    except JWTError:
+        print(f"PAYLOAD: {payload}")   
+        sub = payload.get("sub")
+        if sub is None: raise exc
+        user_id = int(sub)
+    except (JWTError, TypeError, ValueError) as e:
+        print(f"ERROR JWT: {e}")    
         raise exc
     user = db.query(Usuario).filter(Usuario.id == user_id).first()
+    print(f"USUARIO: {user}")   
     if not user: raise exc
     return user
 
@@ -278,7 +283,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(usuario)
-    token = create_access_token({"sub": usuario.id, "rol": data.rol})
+    token = create_access_token({"sub": str(usuario.id), "rol": data.rol})
     return TokenResponse(access_token=token, token_type="bearer", user=build_user_public(usuario, perfil))
 
 
@@ -291,7 +296,7 @@ def login(creds: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(403, f"Esta cuenta no tiene acceso como '{creds.role}'.")
 
     perfil = usuario.medico or usuario.paciente
-    token  = create_access_token({"sub": usuario.id, "rol": usuario.rol.value})
+    token = create_access_token({"sub": str(usuario.id), "rol": usuario.rol.value})
     return TokenResponse(access_token=token, token_type="bearer", user=build_user_public(usuario, perfil))
 
 
