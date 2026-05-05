@@ -6,13 +6,13 @@
 <title>NeuroDia — Monitoreo Diario</title>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/monitoreo.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<div class="app-layout">
-
-  <!-- SIDEBAR -->
+<div class="app-layout">   
+<!-- NAV -->
+<!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <img src="assets/neurodia.png" alt="NeuroDia">
@@ -46,197 +46,680 @@
       </button>
     </div>
   </aside>
+<main class="main-content">
 
-  <!-- MAIN CONTENT -->
-  <main class="main-content">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>Mi Monitoreo</h1>
+    <p>Registra tus síntomas diarios para que tu médico pueda darte el mejor seguimiento.</p>
+    <div class="date-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="fecha-hoy"></span>
+    </div>
+  </div>
 
-    <header class="page-header">
+  <!-- ALERT BANNER (shown when thresholds exceeded) -->
+  <div class="alert-banner" id="alert-banner">
+    <div class="alert-banner-icon">🚨</div>
+    <div class="alert-banner-body">
+      <h4 id="alert-banner-title">Alerta generada</h4>
+      <p id="alert-banner-msg"></p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="grid-3" id="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">🩸</div>
       <div>
-        <h1 class="page-title">Monitoreo Diario</h1>
-        <p class="page-subtitle" id="fecha-hoy">Hoy —</p>
+        <div class="stat-label">Última glucosa</div>
+        <div class="stat-value" id="stat-glucosa">—</div>
+        <div class="stat-sub" id="stat-glucosa-sub">Sin registro</div>
       </div>
-      <div class="header-actions">
-        <span id="estado-badge" class="badge-status badge-pending">Pendiente</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon warning">😣</div>
+      <div>
+        <div class="stat-label">Último dolor</div>
+        <div class="stat-value" id="stat-dolor">—</div>
+        <div class="stat-sub">Escala 0–10</div>
       </div>
-    </header>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">📋</div>
+      <div>
+        <div class="stat-label">Registros totales</div>
+        <div class="stat-value" id="stat-registros">0</div>
+        <div class="stat-sub">Este mes</div>
+      </div>
+    </div>
+  </div>
 
-    <div id="page-alert" class="page-alert" style="display:none"></div>
-    <div id="page-success" class="page-alert page-alert-success" style="display:none"></div>
+  <div class="grid-2">
 
-    <!-- Ya registró hoy -->
-    <div id="ya-registrado" style="display:none">
-      <div class="card" style="text-align:center;padding:32px">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="1.5" style="margin:0 auto 16px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <h3 style="font-family:var(--font-display);font-size:20px;color:var(--p1);margin-bottom:8px">Registro del día completado</h3>
-        <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px">Ya registraste tu monitoreo de hoy. ¡Buen trabajo!</p>
-        <div class="resumen-hoy" id="resumen-hoy"></div>
-        <button class="btn-outline-purple" style="margin-top:16px" onclick="editarHoy()">Editar registro de hoy</button>
+    <!-- FORMULARIO REGISTRO DIARIO -->
+    <div class="section-card">
+      <div class="section-head">
+        <div>
+          <h3>Registro del día</h3>
+          <p>Completa tu monitoreo de hoy</p>
+        </div>
+        <div class="date-badge" style="font-size:12px" id="registro-fecha-badge"></div>
+      </div>
+      <div class="section-body">
+
+        <div id="form-success" class="submit-success">
+          <div class="check">✅</div>
+          <h4>¡Registro guardado!</h4>
+          <p>Tu médico podrá ver tu seguimiento de hoy.</p>
+          <button onclick="resetForm()" style="margin-top:12px;padding:8px 20px;border:1px solid var(--p3);border-radius:8px;background:none;color:var(--p2);cursor:pointer;font-family:var(--font-body);font-size:13px;">Nuevo registro</button>
+        </div>
+
+        <form id="registroForm" novalidate>
+
+          <!-- Glucosa -->
+          <div class="field">
+            <label>Glucosa en sangre <span class="req">*</span></label>
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="number" id="glucosa-valor" placeholder="Ej: 120" min="20" max="600" style="flex:1">
+              <span style="font-size:13px;color:var(--text-muted);white-space:nowrap">mg/dL</span>
+            </div>
+            <span class="field-error-msg" id="err-glucosa">Ingresa un valor válido (20–600 mg/dL).</span>
+            <div class="field-hint">Rango normal en ayunas: 70–100 mg/dL</div>
+          </div>
+
+          <div class="field">
+            <label>Momento de medición <span class="req">*</span></label>
+            <select id="glucosa-momento">
+              <option value="">Seleccionar...</option>
+              <option value="ayunas">En ayunas</option>
+              <option value="postprandial">Postprandial (2h después de comer)</option>
+              <option value="nocturno">Nocturno</option>
+            </select>
+            <span class="field-error-msg" id="err-momento">Selecciona el momento.</span>
+          </div>
+
+          <!-- Dolor -->
+          <div class="field">
+            <label>Intensidad del dolor neuropático</label>
+            <div class="slider-wrap">
+              <div class="pain-display" id="pain-display">0</div>
+              <div class="pain-label" id="pain-label">Sin dolor</div>
+              <input type="range" class="pain-slider" id="dolor-slider" min="0" max="10" value="0" step="1">
+              <div class="slider-labels"><span>0 — Sin dolor</span><span>5 — Moderado</span><span>10 — Severo</span></div>
+            </div>
+          </div>
+
+          <!-- Localización dolor -->
+          <div class="field" id="dolor-loc-group" style="display:none">
+            <label>Localización del dolor</label>
+            <div class="chip-group">
+              <input type="checkbox" class="chip-input" id="loc-pie-der" value="Pie derecho">
+              <label class="chip-label" for="loc-pie-der">🦶 Pie derecho</label>
+              <input type="checkbox" class="chip-input" id="loc-pie-izq" value="Pie izquierdo">
+              <label class="chip-label" for="loc-pie-izq">🦶 Pie izquierdo</label>
+              <input type="checkbox" class="chip-input" id="loc-pantorrilla-der" value="Pantorrilla derecha">
+              <label class="chip-label" for="loc-pantorrilla-der">🦵 Pantorrilla derecha</label>
+              <input type="checkbox" class="chip-input" id="loc-pantorrilla-izq" value="Pantorrilla izquierda">
+              <label class="chip-label" for="loc-pantorrilla-izq">🦵 Pantorrilla izquierda</label>
+              <input type="checkbox" class="chip-input" id="loc-mano-der" value="Mano derecha">
+              <label class="chip-label" for="loc-mano-der">✋ Mano derecha</label>
+              <input type="checkbox" class="chip-input" id="loc-mano-izq" value="Mano izquierda">
+              <label class="chip-label" for="loc-mano-izq">✋ Mano izquierda</label>
+              <input type="checkbox" class="chip-input" id="loc-espalda" value="Espalda baja">
+              <label class="chip-label" for="loc-espalda">🔙 Espalda baja</label>
+              <input type="checkbox" class="chip-input" id="loc-otro" value="Otra zona">
+              <label class="chip-label" for="loc-otro">📍 Otra zona</label>
+            </div>
+          </div>
+
+          <!-- Síntomas -->
+          <div class="field">
+            <label>Síntomas presentes hoy</label>
+            <div class="chip-group">
+              <input type="checkbox" class="chip-input" id="s-hormigueo" value="Hormigueo">
+              <label class="chip-label" for="s-hormigueo">⚡ Hormigueo</label>
+              <input type="checkbox" class="chip-input" id="s-ardor" value="Ardor">
+              <label class="chip-label" for="s-ardor">🔥 Ardor</label>
+              <input type="checkbox" class="chip-input" id="s-entumecimiento" value="Entumecimiento">
+              <label class="chip-label" for="s-entumecimiento">🧊 Entumecimiento</label>
+              <input type="checkbox" class="chip-input" id="s-calambres" value="Calambres">
+              <label class="chip-label" for="s-calambres">💥 Calambres</label>
+              <input type="checkbox" class="chip-input" id="s-debilidad" value="Debilidad muscular">
+              <label class="chip-label" for="s-debilidad">💪 Debilidad muscular</label>
+              <input type="checkbox" class="chip-input" id="s-mareo" value="Mareos">
+              <label class="chip-label" for="s-mareo">😵 Mareos</label>
+              <input type="checkbox" class="chip-input" id="s-ninguno" value="Sin síntomas">
+              <label class="chip-label" for="s-ninguno">✅ Sin síntomas</label>
+            </div>
+          </div>
+
+          <!-- Notas -->
+          <div class="field">
+            <label>Notas adicionales</label>
+            <textarea id="notas" rows="3" placeholder="Cualquier observación que quieras compartir con tu médico..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <span id="btn-text">Guardar registro</span>
+            <span id="btn-loader" style="display:none">
+              <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </span>
+          </button>
+
+        </form>
       </div>
     </div>
 
-    <!-- Formulario de monitoreo -->
-    <div id="monitoreo-form" style="display:none">
-      <div class="cards-grid">
+    <!-- HISTORIAL + ALERTAS -->
+    <div style="display:flex;flex-direction:column;gap:24px">
 
-        <!-- GLUCOSA -->
-        <div class="card">
-          <div class="card-header">
-            <h3>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2" style="margin-right:6px"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-              Nivel de glucosa
-            </h3>
-          </div>
-          <div class="two-col">
-            <div class="field-group">
-              <label>Valor (mg/dL)</label>
-              <input type="number" id="glucosa-valor" min="40" max="600" placeholder="Ej. 142" oninput="updateGlucosaBar()">
-              <span class="field-error" id="err-glucosa"></span>
-            </div>
-            <div class="field-group">
-              <label>Momento</label>
-              <select id="glucosa-momento">
-                <option value="">Seleccionar...</option>
-                <option value="ayunas">Ayunas</option>
-                <option value="postprandial">Postprandial (después de comer)</option>
-                <option value="nocturno">Nocturno</option>
-              </select>
-            </div>
-          </div>
-          <div class="glucosa-meter">
-            <div class="glucosa-bar-wrap">
-              <div class="glucosa-bar" id="glucosa-bar"></div>
-            </div>
-            <div class="glucosa-labels">
-              <span>70</span>
-              <span style="color:var(--success)">Normal: 70–130</span>
-              <span>300+</span>
-            </div>
-            <p id="glucosa-status" class="glucosa-status"></p>
+      <!-- Mini chart -->
+      <div class="section-card">
+        <div class="section-head">
+          <div><h3>Tendencia de glucosa</h3><p>Últimos 7 días</p></div>
+        </div>
+        <div class="section-body" style="padding:16px 20px">
+          <div class="chart-wrap">
+            <canvas id="glucosaChart"></canvas>
           </div>
         </div>
-
-        <!-- DOLOR -->
-        <div class="card">
-          <div class="card-header">
-            <h3>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2" style="margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Intensidad del dolor neuropático
-            </h3>
-          </div>
-          <div class="dolor-num-wrap">
-            <span class="dolor-num" id="dolor-num">0</span>
-            <span class="dolor-label" id="dolor-label">Sin dolor</span>
-          </div>
-          <input type="range" id="dolor-slider" min="0" max="10" value="0" step="1"
-                 oninput="updateDolor(this.value)" class="dolor-slider">
-          <div class="slider-marks">
-            <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
-          </div>
-          <div class="field-group" style="margin-top:16px">
-            <label>Localización del dolor</label>
-            <div class="pill-group" id="localizaciones-pills">
-              <button type="button" class="pill" onclick="togPill(this)" data-val="pies">Pies</button>
-              <button type="button" class="pill" onclick="togPill(this)" data-val="pantorrillas">Pantorrillas</button>
-              <button type="button" class="pill" onclick="togPill(this)" data-val="manos">Manos</button>
-              <button type="button" class="pill" onclick="togPill(this)" data-val="muslos">Muslos</button>
-              <button type="button" class="pill" onclick="togPill(this)" data-val="espalda">Espalda</button>
-              <button type="button" class="pill" onclick="togPill(this)" data-val="cabeza">Cabeza</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SÍNTOMAS -->
-        <div class="card">
-          <div class="card-header">
-            <h3>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2" style="margin-right:6px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-              Síntomas del día
-            </h3>
-          </div>
-          <div class="sintomas-grid">
-            <label class="sintoma-check">
-              <input type="checkbox" value="hormigueo"> Hormigueo / entumecimiento
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="ardor"> Ardor en extremidades
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="debilidad"> Debilidad muscular
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="equilibrio"> Pérdida de equilibrio
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="mareos"> Mareos
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="insomnio"> Insomnio por dolor
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="vision"> Problemas de visión
-            </label>
-            <label class="sintoma-check">
-              <input type="checkbox" value="fatiga"> Fatiga inusual
-            </label>
-          </div>
-        </div>
-
-        <!-- DOSIS -->
-        <div class="card">
-          <div class="card-header">
-            <h3>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2" style="margin-right:6px"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-              Consumo del tratamiento
-            </h3>
-          </div>
-          <div id="dosis-list">
-            <div class="dosis-item">
-              <label class="sintoma-check">
-                <input type="checkbox" value="myo_manana"> Perlas myo-inositol — dosis matutina
-              </label>
-            </div>
-            <div class="dosis-item">
-              <label class="sintoma-check">
-                <input type="checkbox" value="myo_noche"> Perlas myo-inositol — dosis nocturna
-              </label>
-            </div>
-          </div>
-          <div id="dosis-progress" style="margin-top:12px">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-              <span style="color:var(--text-muted)">Adherencia de hoy</span>
-              <span id="dosis-pct" style="color:var(--p2);font-weight:500">0%</span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="dosis-bar"></div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /cards-grid -->
-
-      <!-- NOTAS -->
-      <div class="card" style="margin-top:0">
-        <div class="card-header"><h3>Notas adicionales (opcional)</h3></div>
-        <textarea id="notas" placeholder="Observaciones del día, cómo te sentiste, cambios en tu rutina..." rows="3" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font-body);font-size:14px;resize:vertical;color:var(--text)"></textarea>
       </div>
 
-      <!-- SUBMIT -->
-      <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:4px;padding-bottom:32px">
-        <button class="btn-outline-purple" onclick="resetForm()">Limpiar</button>
-        <button class="btn-primary-purple" id="submit-btn" onclick="submitMonitoreo()">
-          <span class="btn-text">Guardar registro del día</span>
-          <span class="btn-loader" style="display:none">
-            <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          </span>
-        </button>
+      <!-- Alertas -->
+      <div class="section-card">
+        <div class="section-head">
+          <div><h3>Mis alertas</h3><p>Notificaciones de tu médico</p></div>
+          <span id="alert-count" class="badge badge-error" style="display:none"></span>
+        </div>
+        <div class="section-body" style="padding:16px 24px">
+          <div id="alertas-list">
+            <div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <p>Sin alertas activas. ¡Sigue así!</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-    </div><!-- /monitoreo-form -->
+      <!-- Historial -->
+      <div class="section-card">
+        <div class="section-head">
+          <div><h3>Historial de registros</h3><p>Tus últimos monitoreos</p></div>
+        </div>
+        <div class="section-body" style="padding:0">
+          <div style="padding:0 24px">
+            <div class="hist-tabs">
+              <button class="hist-tab active" onclick="switchHist('tabla', this)">Tabla</button>
+              <button class="hist-tab" onclick="switchHist('dolor', this)">Dolor</button>
+            </div>
+          </div>
+          <div class="hist-panel active" id="hist-tabla" style="padding:0 0 16px">
+            <div style="overflow-x:auto;padding:0 0 4px">
+              <table class="history-table" id="history-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Glucosa</th>
+                    <th>Momento</th>
+                    <th>Dolor</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="history-tbody">
+                  <tr><td colspan="5"><div class="empty-state"><p>Cargando historial...</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="hist-panel" id="hist-dolor" style="padding:0 24px 20px">
+            <div class="chart-wrap" style="height:120px">
+              <canvas id="dolorChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  </main>
+    </div>
+  </div>
 </div>
 
-<script src="js/auth.js"></script>
-<script src="js/monitoreo.js"></script>
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+const API_BASE = "http://localhost:8000";
+let currentUser = null;
+let glucosaChartInstance = null;
+let dolorChartInstance = null;
+let historialData = [];
+
+/* ── AUTH ── */
+function getToken() {
+  return localStorage.getItem("nd_token") || sessionStorage.getItem("nd_token");
+}
+
+function logout() {
+  localStorage.removeItem("nd_token"); localStorage.removeItem("nd_user");
+  sessionStorage.removeItem("nd_token"); sessionStorage.removeItem("nd_user");
+  window.location.href = "index.html";
+}
+
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  if (!token) { window.location.href = "index.html"; return; }
+  return fetch(url, {
+    ...options,
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", ...(options.headers || {}) }
+  });
+}
+
+/* ── INIT ── */
+
+
+/* ── HISTORIAL ── */
+async function loadHistorial() {
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/registros?limit=14`);
+    if (!res || !res.ok) { renderHistorialEmpty(); return; }
+    historialData = await res.json();
+    renderHistorialTable(historialData);
+    renderGlucosaChart(historialData);
+    renderDolorChart(historialData);
+    updateStats(historialData);
+  } catch(e) {
+    renderHistorialEmpty();
+  }
+}
+
+function renderHistorialEmpty() {
+  document.getElementById("history-tbody").innerHTML =
+    `<tr><td colspan="5"><div class="empty-state">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <p>No hay registros todavía. ¡Empieza hoy!</p>
+    </div></td></tr>`;
+  renderGlucosaChart([]);
+  renderDolorChart([]);
+}
+
+function renderHistorialTable(data) {
+  const tbody = document.getElementById("history-tbody");
+  if (!data.length) { renderHistorialEmpty(); return; }
+
+  const momentoLabel = { ayunas: 'Ayunas', postprandial: 'Postprandial', nocturno: 'Nocturno' };
+  const estadoBadge = {
+    completo:   '<span class="badge badge-ok">Completo</span>',
+    incompleto: '<span class="badge badge-warn">Incompleto</span>',
+    pendiente:  '<span class="badge badge-muted">Pendiente</span>'
+  };
+
+  tbody.innerHTML = data.slice(0, 10).map(r => {
+    const g = r.glucosa_valor ? `${r.glucosa_valor} <small>mg/dL</small>` : '—';
+    const gClass = r.glucosa_valor > 180 ? 'color:var(--error)' : r.glucosa_valor < 70 ? 'color:var(--warning)' : '';
+    const d = r.dolor_intensidad !== null ? r.dolor_intensidad : '—';
+    const dClass = r.dolor_intensidad >= 7 ? 'color:var(--error)' : r.dolor_intensidad >= 4 ? 'color:var(--warning)' : '';
+    const fecha = new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+    return `<tr>
+      <td>${fecha}</td>
+      <td style="${gClass}">${g}</td>
+      <td>${momentoLabel[r.glucosa_momento] || '—'}</td>
+      <td style="${dClass}">${d}/10</td>
+      <td>${estadoBadge[r.estado] || ''}</td>
+    </tr>`;
+  }).join('');
+
+  // Update month count
+  const thisMonth = data.filter(r => new Date(r.fecha).getMonth() === new Date().getMonth());
+  document.getElementById("stat-registros").textContent = thisMonth.length;
+}
+
+function updateStats(data) {
+  if (!data.length) return;
+  const last = data[0];
+  if (last.glucosa_valor) {
+    document.getElementById("stat-glucosa").textContent = `${last.glucosa_valor}`;
+    document.getElementById("stat-glucosa-sub").textContent = last.glucosa_momento || '';
+  }
+  if (last.dolor_intensidad !== null) {
+    document.getElementById("stat-dolor").textContent = `${last.dolor_intensidad}/10`;
+  }
+}
+
+/* ── CHARTS ── */
+function renderGlucosaChart(data) {
+  const ctx = document.getElementById('glucosaChart').getContext('2d');
+  if (glucosaChartInstance) glucosaChartInstance.destroy();
+
+  const recent = [...data].reverse().slice(-7);
+  const labels = recent.map(r => {
+    const d = new Date(r.fecha + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+  });
+  const values = recent.map(r => r.glucosa_valor || null);
+
+  glucosaChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['Sin datos'],
+      datasets: [{
+        label: 'Glucosa (mg/dL)',
+        data: values.length ? values : [null],
+        borderColor: '#706fa1', backgroundColor: 'rgba(112,111,161,.1)',
+        tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4a4888',
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8a8aaa' } },
+        y: {
+          grid: { color: '#f0eff9' }, ticks: { font: { size: 11 }, color: '#8a8aaa' },
+          suggestedMin: 60, suggestedMax: 200
+        }
+      }
+    }
+  });
+}
+
+function renderDolorChart(data) {
+  const ctx = document.getElementById('dolorChart').getContext('2d');
+  if (dolorChartInstance) dolorChartInstance.destroy();
+
+  const recent = [...data].reverse().slice(-7);
+  const labels = recent.map(r => {
+    const d = new Date(r.fecha + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+  });
+  const values = recent.map(r => r.dolor_intensidad !== null ? r.dolor_intensidad : null);
+
+  dolorChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.length ? labels : ['Sin datos'],
+      datasets: [{
+        label: 'Dolor',
+        data: values.length ? values : [null],
+        backgroundColor: values.map(v => v >= 7 ? 'rgba(163,45,45,.5)' : v >= 4 ? 'rgba(212,160,23,.5)' : 'rgba(45,110,69,.4)'),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8a8aaa' } },
+        y: { min: 0, max: 10, grid: { color: '#f0eff9' }, ticks: { font: { size: 11 }, color: '#8a8aaa' } }
+      }
+    }
+  });
+}
+
+/* ── ALERTAS ── */
+async function loadAlertas() {
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/alertas`);
+    if (!res || !res.ok) return;
+    const alertas = await res.json();
+    renderAlertas(alertas);
+  } catch(e) { /* sin conexión, mostrar vacío */ }
+}
+
+const alertaTipo = {
+  glucosa_alta:    { icon: '🩸', label: 'Glucosa elevada', color: 'red' },
+  glucosa_baja:    { icon: '⬇️', label: 'Glucosa baja', color: 'yellow' },
+  dolor_severo:    { icon: '😣', label: 'Dolor severo', color: 'red' },
+  baja_adherencia: { icon: '💊', label: 'Baja adherencia', color: 'yellow' },
+  otro:            { icon: '📋', label: 'Aviso médico', color: 'blue' },
+};
+
+function renderAlertas(alertas) {
+  const list = document.getElementById("alertas-list");
+  const noResueltas = alertas.filter(a => !a.resuelta);
+
+  if (noResueltas.length) {
+    document.getElementById("alert-count").style.display = 'inline-flex';
+    document.getElementById("alert-count").textContent = `${noResueltas.length} nueva${noResueltas.length > 1 ? 's' : ''}`;
+  }
+
+  if (!alertas.length) {
+    list.innerHTML = `<div class="empty-state">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <p>Sin alertas activas. ¡Sigue así!</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = alertas.slice(0, 5).map(a => {
+    const t = alertaTipo[a.tipo] || alertaTipo.otro;
+    const fecha = new Date(a.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `<div class="alert-item">
+      <div class="alert-dot ${t.color}"></div>
+      <div class="alert-body">
+        <h5>${t.icon} ${t.label}${a.resuelta ? ' <span class="badge badge-ok" style="font-size:11px">Resuelta</span>' : ''}</h5>
+        <p>${a.descripcion}</p>
+        <div class="alert-time">${fecha}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── PAIN SLIDER ── */
+const painLabels = ['Sin dolor','Muy leve','Leve','Leve moderado','Moderado','Moderado','Moderado intenso','Intenso','Muy intenso','Severo','Insoportable'];
+document.getElementById("dolor-slider").addEventListener("input", function() {
+  const v = parseInt(this.value);
+  document.getElementById("pain-display").textContent = v;
+  document.getElementById("pain-label").textContent = painLabels[v];
+  document.getElementById("dolor-loc-group").style.display = v > 0 ? 'block' : 'none';
+});
+
+/* ── FORM SUBMIT ── */
+document.getElementById("registroForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  // Validate
+  let valid = true;
+  const glucosaVal = parseFloat(document.getElementById("glucosa-valor").value);
+  const momento = document.getElementById("glucosa-momento").value;
+  const dolor = parseInt(document.getElementById("dolor-slider").value);
+
+  document.querySelectorAll(".field-error-msg").forEach(el => el.classList.remove("show"));
+  document.querySelectorAll("input.has-error, select.has-error").forEach(el => el.classList.remove("has-error"));
+
+  if (!glucosaVal || glucosaVal < 20 || glucosaVal > 600) {
+    document.getElementById("err-glucosa").classList.add("show");
+    document.getElementById("glucosa-valor").classList.add("has-error");
+    valid = false;
+  }
+  if (!momento) {
+    document.getElementById("err-momento").classList.add("show");
+    document.getElementById("glucosa-momento").classList.add("has-error");
+    valid = false;
+  }
+  if (!valid) return;
+
+  // Collect chips
+  const localizaciones = [...document.querySelectorAll(".chip-input[id^='loc-']:checked")].map(c => c.value);
+  const sintomas = [...document.querySelectorAll(".chip-input[id^='s-']:checked")].map(c => c.value);
+
+  // Build payload
+  const today = new Date().toISOString().split('T')[0];
+  const payload = {
+    fecha: today,
+    glucosa_valor: glucosaVal,
+    glucosa_momento: momento,
+    dolor_intensidad: dolor,
+    notas: document.getElementById("notas").value.trim() || null,
+    localizaciones,
+    sintomas
+  };
+
+  // Loading state
+  document.getElementById("btn-text").style.display = "none";
+  document.getElementById("btn-loader").style.display = "flex";
+  document.getElementById("submit-btn").disabled = true;
+
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/registros`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    if (res && res.ok) {
+      const data = await res.json();
+
+      // Check alerts triggered
+      checkLocalAlerts(glucosaVal, dolor);
+
+      // Show success
+      document.getElementById("registroForm").style.display = "none";
+      document.getElementById("form-success").classList.add("show");
+
+      // Refresh data
+      await loadHistorial();
+    } else {
+      const err = res ? await res.json() : {};
+      const msg = err.detail || "Error al guardar. Intenta de nuevo.";
+      showBannerAlert("error", "No se pudo guardar", msg);
+    }
+  } catch(err) {
+    // Fallback: save locally for demo
+    saveLocalDemo(payload);
+  } finally {
+    document.getElementById("btn-text").style.display = "inline";
+    document.getElementById("btn-loader").style.display = "none";
+    document.getElementById("submit-btn").disabled = false;
+  }
+});
+
+/* ── LOCAL DEMO FALLBACK (cuando no hay API) ── */
+function saveLocalDemo(payload) {
+  const stored = JSON.parse(localStorage.getItem("nd_registros") || "[]");
+  stored.unshift({ ...payload, id: Date.now(), estado: 'completo' });
+  localStorage.setItem("nd_registros", JSON.stringify(stored.slice(0, 30)));
+
+  checkLocalAlerts(payload.glucosa_valor, payload.dolor_intensidad);
+
+  document.getElementById("registroForm").style.display = "none";
+  document.getElementById("form-success").classList.add("show");
+
+  // Refresh from local
+  historialData = stored;
+  renderHistorialTable(stored);
+  renderGlucosaChart(stored);
+  renderDolorChart(stored);
+  updateStats(stored);
+}
+
+function loadLocalDemo() {
+  const stored = JSON.parse(localStorage.getItem("nd_registros") || "[]");
+  if (stored.length) {
+    historialData = stored;
+    renderHistorialTable(stored);
+    renderGlucosaChart(stored);
+    renderDolorChart(stored);
+    updateStats(stored);
+  } else {
+    renderHistorialEmpty();
+  }
+}
+
+/* ── ALERT LOGIC ── */
+function checkLocalAlerts(glucosa, dolor) {
+  const alerts = [];
+  if (glucosa > 250) alerts.push({ type: 'error', title: '🚨 Glucosa muy elevada', msg: `Tu glucosa de ${glucosa} mg/dL supera el umbral seguro (>250). Contacta a tu médico.` });
+  else if (glucosa > 180) alerts.push({ type: 'warning', title: '⚠️ Glucosa elevada', msg: `Tu glucosa de ${glucosa} mg/dL está sobre el rango normal (>180). Monitorea con atención.` });
+  else if (glucosa < 70) alerts.push({ type: 'error', title: '⬇️ Glucosa baja (hipoglucemia)', msg: `Tu glucosa de ${glucosa} mg/dL está por debajo del rango mínimo. Consume algo con azúcar.` });
+
+  if (dolor >= 8) alerts.push({ type: 'error', title: '😣 Dolor severo reportado', msg: `Registraste un dolor de ${dolor}/10. Tu médico será notificado.` });
+
+  if (alerts.length) {
+    const first = alerts[0];
+    showBannerAlert(first.type === 'error' ? 'error' : 'warning', first.title, first.msg);
+
+    // Save to local alerts
+    const storedAlerts = JSON.parse(localStorage.getItem("nd_alertas") || "[]");
+    alerts.forEach(a => storedAlerts.unshift({
+      tipo: a.type === 'error' && a.title.includes('Glucosa') ? 'glucosa_alta' : a.type === 'error' ? 'dolor_severo' : 'glucosa_alta',
+      descripcion: a.msg, resuelta: false, created_at: new Date().toISOString()
+    }));
+    localStorage.setItem("nd_alertas", JSON.stringify(storedAlerts.slice(0, 20)));
+    renderAlertas(storedAlerts);
+  }
+}
+
+function showBannerAlert(type, title, msg) {
+  const banner = document.getElementById("alert-banner");
+  document.getElementById("alert-banner-title").textContent = title;
+  document.getElementById("alert-banner-msg").textContent = msg;
+  banner.className = `alert-banner show${type === 'warning' ? ' warning' : ''}`;
+  banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ── RESET FORM ── */
+function resetForm() {
+  document.getElementById("registroForm").reset();
+  document.getElementById("registroForm").style.display = "block";
+  document.getElementById("form-success").classList.remove("show");
+  document.getElementById("pain-display").textContent = "0";
+  document.getElementById("pain-label").textContent = "Sin dolor";
+  document.getElementById("dolor-loc-group").style.display = "none";
+}
+
+/* ── HIST TABS ── */
+function switchHist(tab, btn) {
+  document.querySelectorAll(".hist-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".hist-panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById(`hist-${tab}`).classList.add("active");
+}
+
+/* ── LOAD LOCAL DEMO if no API ── */
+async function tryLoadData() {
+  try {
+    const token = getToken();
+    if (token) {
+      await loadHistorial();
+      await loadAlertas();
+    } else {
+      loadLocalDemo();
+      loadLocalAlerts();
+    }
+  } catch(e) {
+    loadLocalDemo();
+    loadLocalAlerts();
+  }
+}
+
+function loadLocalAlerts() {
+  const stored = JSON.parse(localStorage.getItem("nd_alertas") || "[]");
+  renderAlertas(stored);
+}
+
+/* ── START ── */
+(async function() {
+  // Set date
+  const now = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById("fecha-hoy").textContent = now.toLocaleDateString('es-MX', opts);
+  document.getElementById("registro-fecha-badge").textContent = now.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Try to get user from storage
+  const stored = localStorage.getItem("nd_user") || sessionStorage.getItem("nd_user");
+  if (stored) {
+    currentUser = JSON.parse(stored);
+    document.getElementById("sidebar-nombre").textContent = `${currentUser.nombre} ${currentUser.apellidos || ''}`.trim();
+  } else {
+    document.getElementById("sidebar-nombre").textContent = "Paciente";
+    // Allow demo mode
+  }
+
+  await tryLoadData();
+})();
+</script>
+  </main>
+</div>
+</div>
 </body>
 </html>
