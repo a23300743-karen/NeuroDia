@@ -203,7 +203,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             window.location.href = "perfil.html"; 
         } else if (rol === 'medico') {
             alert("El panel de médico está en desarrollo.");
-            // window.location.href = "dashboard_medico.html";
+            window.location.href = "dashboard_medico.html";
         } else {
             window.location.href = "index.html";
         }

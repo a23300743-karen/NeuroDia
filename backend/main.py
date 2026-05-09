@@ -115,6 +115,7 @@ class PerfilOut(BaseModel):
     hba1c:            Optional[Decimal]
     grupo_estudio:    Optional[str]
     consentimiento:   bool
+    verificado:      bool
     model_config = {"from_attributes": True}
 
 
@@ -214,17 +215,16 @@ async def get_current_user(
     exc = HTTPException(status_code=401, detail="Token inválido o expirado",
                         headers={"WWW-Authenticate": "Bearer"})
     try:
-        print(f"TOKEN RECIBIDO: {token}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(f"PAYLOAD: {payload}")   
-        sub = payload.get("sub")
-        if sub is None: raise exc
-        user_id = int(sub)
-    except (JWTError, TypeError, ValueError) as e:
-        print(f"ERROR JWT: {e}")    
+        print("TOKEN PAYLOAD:", payload)          # ← agregar esta línea
+        user_id = int(payload.get("sub"))
+        print("USER ID:", user_id)                # ← y esta
+        if user_id is None: raise exc
+    except JWTError as e:
+        print("JWT ERROR:", e)                    # ← y esta
         raise exc
     user = db.query(Usuario).filter(Usuario.id == user_id).first()
-    print(f"USUARIO: {user}")   
+    print("USER FOUND:", user)                    # ← y esta
     if not user: raise exc
     return user
 
@@ -296,7 +296,7 @@ def login(creds: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(403, f"Esta cuenta no tiene acceso como '{creds.role}'.")
 
     perfil = usuario.medico or usuario.paciente
-    token = create_access_token({"sub": str(usuario.id), "rol": usuario.rol.value})
+    token  = create_access_token({"sub": str(usuario.id), "rol": usuario.rol.value})
     return TokenResponse(access_token=token, token_type="bearer", user=build_user_public(usuario, perfil))
 
 
@@ -575,3 +575,294 @@ def delete_medicamento(
     m.activo = False   # soft delete
     db.commit()
     return {"ok": True}
+
+# ══════════════════════════════════════════════
+# RUTAS — Médico: dashboard y gestión
+# ══════════════════════════════════════════════
+
+class PacienteResumenOut(BaseModel):
+    id:               int
+    nombre:           str
+    apellidos:        str
+    tipo_diabetes:    Optional[str]
+    hba1c:            Optional[Decimal]
+    anios_diagnostico:Optional[int]
+    verificado:       bool
+    consentimiento:   bool
+    ultima_glucosa:   Optional[Decimal] = None
+    ultima_fecha:     Optional[date]    = None
+    alertas_activas:  int               = 0
+    model_config = {"from_attributes": True}
+
+
+class DashboardMedicoOut(BaseModel):
+    total_pacientes:     int
+    pacientes_activos:   int
+    alertas_pendientes:  int
+    sin_registro_7dias:  int
+
+
+class AltaPacienteIn(BaseModel):
+    email:            EmailStr
+    password:         str
+    nombre:           str
+    apellidos:        str
+    tipo_diabetes:    Optional[str]  = "tipo_2"
+    anios_diagnostico:Optional[int] = None
+    hba1c:            Optional[Decimal] = None
+    grupo_estudio:    Optional[str] = None
+    consentimiento:   bool          = False
+
+    @field_validator("password")
+    @classmethod
+    def pw_min(cls, v):
+        if len(v) < 8:
+            raise ValueError("Mínimo 8 caracteres")
+        return v
+
+
+def get_medico_or_403(current_user: Usuario) -> Medico:
+    if current_user.rol.value != "medico":
+        raise HTTPException(403, "Solo médicos pueden acceder a este recurso.")
+    if not current_user.medico:
+        raise HTTPException(404, "Perfil de médico no encontrado.")
+    return current_user.medico
+
+
+@app.get("/medico/dashboard", response_model=DashboardMedicoOut, tags=["Médico"])
+def get_dashboard_medico(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    pacientes = db.query(Paciente).filter(Paciente.medico_id == medico.id).all()
+
+    hace_7 = date.today().toordinal() - 7
+    sin_registro = 0
+    for p in pacientes:
+        ultimo = (
+            db.query(RegistroDiario)
+            .filter(RegistroDiario.paciente_id == p.id)
+            .order_by(RegistroDiario.fecha.desc())
+            .first()
+        )
+        if not ultimo or ultimo.fecha.toordinal() < hace_7:
+            sin_registro += 1
+
+    alertas = db.query(Alerta).filter(
+        Alerta.medico_id == medico.id, Alerta.resuelta == False
+    ).count()
+
+    return DashboardMedicoOut(
+        total_pacientes    = len(pacientes),
+        pacientes_activos  = len([p for p in pacientes if p.consentimiento]),
+        alertas_pendientes = alertas,
+        sin_registro_7dias = sin_registro,
+    )
+
+
+@app.get("/medico/pacientes", response_model=List[PacienteResumenOut], tags=["Médico"])
+def get_mis_pacientes(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    pacientes = (
+        db.query(Paciente)
+        .filter(Paciente.medico_id == medico.id)
+        .order_by(Paciente.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for p in pacientes:
+        ultimo = (
+            db.query(RegistroDiario)
+            .filter(RegistroDiario.paciente_id == p.id)
+            .order_by(RegistroDiario.fecha.desc())
+            .first()
+        )
+        alertas_n = db.query(Alerta).filter(
+            Alerta.paciente_id == p.id, Alerta.resuelta == False
+        ).count()
+        result.append(PacienteResumenOut(
+            id=p.id, nombre=p.nombre, apellidos=p.apellidos,
+            tipo_diabetes=p.tipo_diabetes.value if p.tipo_diabetes else None,
+            hba1c=p.hba1c, anios_diagnostico=p.anios_diagnostico,
+            verificado=p.verificado, consentimiento=p.consentimiento,
+            ultima_glucosa=ultimo.glucosa_valor if ultimo else None,
+            ultima_fecha=ultimo.fecha if ultimo else None,
+            alertas_activas=alertas_n,
+        ))
+    return result
+
+
+@app.get("/medico/alertas", response_model=List[AlertaOut], tags=["Médico"])
+def get_alertas_medico(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    return (
+        db.query(Alerta)
+        .filter(Alerta.medico_id == medico.id, Alerta.resuelta == False)
+        .order_by(Alerta.created_at.desc())
+        .limit(50)
+        .all()
+    )
+
+
+@app.post("/medico/alta-paciente", response_model=PacienteResumenOut, status_code=201, tags=["Médico"])
+def alta_paciente(
+    data: AltaPacienteIn,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+
+    if db.query(Usuario).filter(Usuario.email == data.email).first():
+        raise HTTPException(409, "Este correo ya está registrado.")
+
+    usuario = Usuario(
+        email=data.email,
+        password_hash=hash_password(data.password),
+        rol=RolEnum.paciente
+    )
+    db.add(usuario)
+    db.flush()
+
+    from backend.models import DiabetesEnum
+    paciente = Paciente(
+        usuario_id        = usuario.id,
+        medico_id         = medico.id,
+        nombre            = data.nombre,
+        apellidos         = data.apellidos,
+        tipo_diabetes     = DiabetesEnum(data.tipo_diabetes) if data.tipo_diabetes else DiabetesEnum.tipo_2,
+        anios_diagnostico = data.anios_diagnostico,
+        hba1c             = data.hba1c,
+        grupo_estudio     = data.grupo_estudio,
+        consentimiento    = data.consentimiento,
+        verificado        = True,   # el médico que da de alta ya verifica
+    )
+    db.add(paciente)
+    db.commit()
+    db.refresh(paciente)
+
+    return PacienteResumenOut(
+        id=paciente.id, nombre=paciente.nombre, apellidos=paciente.apellidos,
+        tipo_diabetes=paciente.tipo_diabetes.value if paciente.tipo_diabetes else None,
+        hba1c=paciente.hba1c, anios_diagnostico=paciente.anios_diagnostico,
+        verificado=paciente.verificado, consentimiento=paciente.consentimiento,
+        alertas_activas=0,
+    )
+
+
+@app.patch("/medico/pacientes/{paciente_id}/verificar", tags=["Médico"])
+def verificar_paciente(
+    paciente_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    paciente = db.query(Paciente).filter(
+        Paciente.id == paciente_id,
+        Paciente.medico_id == medico.id
+    ).first()
+    if not paciente:
+        raise HTTPException(404, "Paciente no encontrado o no pertenece a este médico.")
+    paciente.verificado = True
+    db.commit()
+    return {"ok": True, "verificado": True}
+
+
+@app.get("/medico/pacientes/{paciente_id}/detalle", tags=["Médico"])
+def get_paciente_detalle(
+    paciente_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    p = db.query(Paciente).filter(
+        Paciente.id == paciente_id,
+        Paciente.medico_id == medico.id
+    ).first()
+    if not p:
+        raise HTTPException(404, "Paciente no encontrado.")
+
+    registros = (
+        db.query(RegistroDiario)
+        .filter(RegistroDiario.paciente_id == p.id)
+        .order_by(RegistroDiario.fecha.desc())
+        .limit(30)
+        .all()
+    )
+    alertas = db.query(Alerta).filter(
+        Alerta.paciente_id == p.id
+    ).order_by(Alerta.created_at.desc()).limit(10).all()
+
+    return {
+        "paciente": {
+            "id": p.id, "nombre": p.nombre, "apellidos": p.apellidos,
+            "tipo_diabetes": p.tipo_diabetes.value if p.tipo_diabetes else None,
+            "hba1c": float(p.hba1c) if p.hba1c else None,
+            "anios_diagnostico": p.anios_diagnostico,
+            "verificado": p.verificado, "consentimiento": p.consentimiento,
+            "grupo_estudio": p.grupo_estudio,
+            "comorbilidades": [c.nombre for c in p.comorbilidades if c.activa],
+            "medicamentos": [{"nombre": m.nombre, "dosis": m.dosis} for m in p.medicamentos if m.activo],
+        },
+        "registros": [{
+            "fecha": str(r.fecha),
+            "glucosa_valor": float(r.glucosa_valor) if r.glucosa_valor else None,
+            "glucosa_momento": r.glucosa_momento.value if r.glucosa_momento else None,
+            "dolor_intensidad": r.dolor_intensidad,
+            "estado": r.estado.value,
+            "sintomas": [s.sintoma for s in r.sintomas],
+        } for r in registros],
+        "alertas": [{
+            "id": a.id, "tipo": a.tipo.value,
+            "descripcion": a.descripcion,
+            "resuelta": a.resuelta,
+            "created_at": a.created_at.isoformat(),
+        } for a in alertas],
+    }
+
+
+# ── Vincular paciente por correo ─────────────────
+class VincularPacienteIn(BaseModel):
+    email: EmailStr
+
+@app.post("/medico/vincular-paciente", response_model=PacienteResumenOut, tags=["Médico"])
+def vincular_paciente(
+    data: VincularPacienteIn,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+
+    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if not usuario:
+        raise HTTPException(404, "No existe ningún usuario con ese correo.")
+    if usuario.rol.value != "paciente":
+        raise HTTPException(400, "Ese correo no corresponde a una cuenta de paciente.")
+
+    paciente = db.query(Paciente).filter(Paciente.usuario_id == usuario.id).first()
+    if not paciente:
+        raise HTTPException(404, "El usuario no tiene perfil de paciente.")
+    if paciente.medico_id and paciente.medico_id != medico.id:
+        raise HTTPException(409, "Este paciente ya está asignado a otro médico.")
+    if paciente.medico_id == medico.id:
+        raise HTTPException(409, "Este paciente ya está en tu panel.")
+
+    paciente.medico_id = medico.id
+    db.commit()
+    db.refresh(paciente)
+
+    alertas_n = db.query(Alerta).filter(Alerta.paciente_id == paciente.id, Alerta.resuelta == False).count()
+    return PacienteResumenOut(
+        id=paciente.id, nombre=paciente.nombre, apellidos=paciente.apellidos,
+        tipo_diabetes=paciente.tipo_diabetes.value if paciente.tipo_diabetes else None,
+        hba1c=paciente.hba1c, anios_diagnostico=paciente.anios_diagnostico,
+        verificado=paciente.verificado, consentimiento=paciente.consentimiento,
+        alertas_activas=alertas_n,
+    )

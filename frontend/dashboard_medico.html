@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroDia — Panel Médico</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/medico.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/neurodia.png" alt="NeuroDia">
+      <span>NeuroDia</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard_medico.html" class="nav-item active" id="nav-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Resumen
+      </a>
+      <a href="#" class="nav-item" id="nav-pacientes" onclick="showView('pacientes');return false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Mis Pacientes
+      </a>
+      <a href="#" class="nav-item" id="nav-alertas" onclick="showView('alertas');return false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alertas
+        <span class="nav-badge" id="nav-alert-count" style="display:none"></span>
+      </a>
+      <a href="#" class="nav-item" id="nav-alta" onclick="showView('alta');return false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Vincular Paciente
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="sidebar-avatar">--</div>
+        <div class="user-info">
+          <span id="sidebar-nombre">Cargando...</span>
+          <span class="user-role">Médico</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Salir
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- ══ VIEW: RESUMEN ══ -->
+    <div id="view-resumen">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Bienvenido, Dr. <span id="medico-nombre">—</span></h1>
+          <p class="page-subtitle" id="fecha-hoy"></p>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="kpi-label">Total pacientes</div>
+            <div class="kpi-value" id="kpi-total">—</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="kpi-label">Con consentimiento</div>
+            <div class="kpi-value" id="kpi-activos">—</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div>
+            <div class="kpi-label">Alertas pendientes</div>
+            <div class="kpi-value" id="kpi-alertas">—</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="kpi-label">Sin registro (7 días)</div>
+            <div class="kpi-value" id="kpi-sinreg">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas recientes + Pacientes recientes -->
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>Alertas recientes</h3>
+            <button class="btn-edit" onclick="showView('alertas')">Ver todas</button>
+          </div>
+          <div id="resumen-alertas">
+            <div class="loading-state" style="padding:20px"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Pacientes recientes</h3>
+            <button class="btn-edit" onclick="showView('pacientes')">Ver todos</button>
+          </div>
+          <div id="resumen-pacientes">
+            <div class="loading-state" style="padding:20px"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: PACIENTES ══ -->
+    <div id="view-pacientes" style="display:none">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Mis Pacientes</h1>
+          <p class="page-subtitle">Listado y seguimiento de tu panel de pacientes</p>
+        </div>
+        <div class="header-actions">
+          <input type="text" id="search-pacientes" placeholder="Buscar paciente..." class="search-input" oninput="filterPacientes(this.value)">
+          <button class="btn-primary-purple" onclick="showView('alta')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Alta paciente
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="med-table" id="tabla-pacientes">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Diabetes</th>
+              <th>HbA1c</th>
+              <th>Última glucosa</th>
+              <th>Alertas</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-pacientes">
+            <tr><td colspan="7"><div class="loading-state" style="padding:32px"><svg class="spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Cargando...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: DETALLE PACIENTE ══ -->
+    <div id="view-detalle" style="display:none">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn-back" onclick="showView('pacientes')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver
+          </button>
+          <div>
+            <h1 class="page-title" id="detalle-nombre">—</h1>
+            <p class="page-subtitle" id="detalle-subtitulo">—</p>
+          </div>
+        </div>
+        <div class="header-actions" id="detalle-acciones"></div>
+      </div>
+
+      <div class="detalle-grid">
+        <!-- Info clínica -->
+        <div class="card">
+          <div class="card-header"><h3>Información clínica</h3></div>
+          <div id="detalle-info"></div>
+        </div>
+        <!-- Registros recientes -->
+        <div class="card" style="grid-column:span 2">
+          <div class="card-header">
+            <h3>Registros recientes</h3>
+            <span id="detalle-alertas-badge"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="med-table" id="detalle-tabla">
+              <thead><tr><th>Fecha</th><th>Glucosa</th><th>Momento</th><th>Dolor</th><th>Síntomas</th><th>Estado</th></tr></thead>
+              <tbody id="detalle-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Alertas del paciente -->
+        <div class="card">
+          <div class="card-header"><h3>Alertas del paciente</h3></div>
+          <div id="detalle-alertas-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: ALERTAS ══ -->
+    <div id="view-alertas" style="display:none">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Alertas pendientes</h1>
+          <p class="page-subtitle">Notificaciones generadas automáticamente por el sistema</p>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="alertas-contenido" style="padding:8px 0">
+          <div class="loading-state" style="padding:32px"><svg class="spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--p3)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Cargando alertas...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: ALTA PACIENTE ══ -->
+    <div id="view-alta" style="display:none">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Alta de Paciente</h1>
+          <p class="page-subtitle">Registra un nuevo paciente asignado a tu consulta</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:520px">
+        <div id="alta-success" style="display:none;text-align:center;padding:32px">
+          <div style="font-size:40px;margin-bottom:12px">✅</div>
+          <h3 style="font-family:var(--font-display);color:var(--p1);margin-bottom:6px">Paciente vinculado</h3>
+          <p style="color:var(--text-muted);font-size:13px;margin-bottom:4px">El paciente ha sido agregado a tu panel correctamente.</p>
+          <p id="alta-success-nombre" style="font-weight:600;color:var(--p1);font-size:15px;margin-bottom:20px"></p>
+          <button class="btn-primary-purple" onclick="resetAltaForm()">Vincular otro paciente</button>
+        </div>
+
+        <form id="alta-form" novalidate>
+          <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:20px">
+            El paciente debe haberse registrado previamente en la app. Ingresa su correo para vincularlo a tu consulta.
+          </p>
+          <div class="field-group">
+            <label>Correo del paciente <span style="color:var(--p3)">*</span></label>
+            <input type="email" id="alta-email" placeholder="correo@ejemplo.com">
+            <span class="field-error" id="err-alta-email"></span>
+          </div>
+
+          <div id="alta-error" class="page-alert" style="display:none;margin-bottom:16px"></div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+            <button type="button" class="btn-cancel" onclick="showView('pacientes')">Cancelar</button>
+            <button type="submit" class="btn-primary-purple" id="alta-btn">
+              <span id="alta-btn-text">Vincular paciente</span>
+              <svg id="alta-btn-loader" class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/dashboard_medico.js" defer></script>
+</body>
+</html>
