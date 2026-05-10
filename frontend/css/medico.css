@@ -226,3 +226,52 @@
 .two-col {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
 }
+
+/* ── Chat médico ── */
+.chat-conv-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; cursor: pointer;
+  border-bottom: 1px solid var(--p8);
+  transition: background var(--transition);
+}
+.chat-conv-item:hover { background: var(--p8); }
+.chat-conv-item--activo { background: var(--p7); border-left: 3px solid var(--p3); }
+
+.chat-conv-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--p3); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; flex-shrink: 0;
+}
+.chat-conv-info { flex: 1; min-width: 0; }
+.chat-conv-nombre { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-conv-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.chat-conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.chat-conv-hora { font-size: 11px; color: var(--text-muted); }
+.chat-conv-badge {
+  background: var(--p2); color: white;
+  font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+/* ── Horario modal ── */
+.horario-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--p8);
+}
+.horario-row:last-child { border-bottom: none; }
+.horario-check {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13.5px; color: var(--text); cursor: pointer; min-width: 110px;
+}
+.horario-check input { accent-color: var(--p2); width: 15px; height: 15px; }
+.horario-times {
+  display: flex; align-items: center; gap: 8px;
+  transition: opacity 150ms;
+}
+.horario-times input[type="time"] {
+  height: 36px; padding: 0 10px; border: 1px solid var(--border);
+  border-radius: var(--radius-md); font-size: 13px;
+  font-family: var(--font-body); color: var(--text); width: 100px;
+}

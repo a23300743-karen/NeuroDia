@@ -965,3 +965,320 @@ def vincular_paciente(
         verificado=paciente.verificado, consentimiento=paciente.consentimiento,
         alertas_activas=alertas_n,
     )
+
+# ══════════════════════════════════════════════
+# CHAT — WebSocket + REST
+# ══════════════════════════════════════════════
+from fastapi import WebSocket, WebSocketDisconnect
+from backend.models import Mensaje, HorarioMedico, EmisorEnum, DiaSemanaEnum
+import json
+from datetime import time as dtime
+
+# ── Connection Manager ────────────────────────
+class ConnectionManager:
+    def __init__(self):
+        # {user_id: websocket}
+        self.active: dict[int, WebSocket] = {}
+
+    async def connect(self, user_id: int, ws: WebSocket):
+        await ws.accept()
+        self.active[user_id] = ws
+
+    def disconnect(self, user_id: int):
+        self.active.pop(user_id, None)
+
+    async def send(self, user_id: int, data: dict):
+        ws = self.active.get(user_id)
+        if ws:
+            try:
+                await ws.send_json(data)
+            except Exception:
+                self.disconnect(user_id)
+
+    def is_online(self, user_id: int) -> bool:
+        return user_id in self.active
+
+manager = ConnectionManager()
+
+
+# ── Helpers ───────────────────────────────────
+def esta_en_horario(medico_id: int, db: Session) -> bool:
+    """Devuelve True si ahora mismo está dentro del horario del médico."""
+    ahora = datetime.now()
+    dias = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"]
+    dia_actual = DiaSemanaEnum(dias[ahora.weekday()])
+    hora_actual = ahora.time()
+
+    horario = db.query(HorarioMedico).filter(
+        HorarioMedico.medico_id == medico_id,
+        HorarioMedico.dia_semana == dia_actual,
+        HorarioMedico.activo == True
+    ).first()
+
+    if not horario:
+        return False
+    return horario.hora_inicio <= hora_actual <= horario.hora_fin
+
+
+# ── WebSocket endpoint ────────────────────────
+@app.websocket("/ws/chat/{user_id}")
+async def websocket_chat(ws: WebSocket, user_id: int, token: str, db: Session = Depends(get_db)):
+    # Autenticar token
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        sub = payload.get("sub")
+        if not sub: await ws.close(code=4001); return
+        uid = int(sub)
+        if uid != user_id: await ws.close(code=4001); return
+    except Exception:
+        await ws.close(code=4001); return
+
+    usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+    if not usuario: await ws.close(code=4001); return
+
+    await manager.connect(user_id, ws)
+
+    # Marcar mensajes como leídos al conectar
+    if usuario.rol.value == "medico" :
+        medico = usuario.medico
+        if medico:
+            db.query(Mensaje).filter(
+                Mensaje.medico_id == medico.id,
+                Mensaje.emisor == EmisorEnum.paciente,
+                Mensaje.leido == False
+            ).update({"leido": True})
+            db.commit()
+    elif usuario.rol.value == "paciente":
+        paciente = usuario.paciente
+        if paciente and paciente.medico_id:
+            db.query(Mensaje).filter(
+                Mensaje.paciente_id == paciente.id,
+                Mensaje.emisor == EmisorEnum.medico,
+                Mensaje.leido == False
+            ).update({"leido": True})
+            db.commit()
+
+    try:
+        while True:
+            raw = await ws.receive_text()
+            data = json.loads(raw)
+            contenido = data.get("contenido", "").strip()
+            if not contenido: continue
+
+            if usuario.rol.value == "paciente":
+                paciente = usuario.paciente
+                if not paciente or not paciente.medico_id: continue
+                medico_id = paciente.medico_id
+                fuera = not esta_en_horario(medico_id, db)
+
+                msg = Mensaje(
+                    paciente_id=paciente.id, medico_id=medico_id,
+                    emisor=EmisorEnum.paciente, contenido=contenido,
+                    fuera_horario=fuera
+                )
+                db.add(msg)
+
+                # Alerta si es fuera de horario
+                if fuera:
+                    db.add(Alerta(
+                        paciente_id=paciente.id, medico_id=medico_id,
+                        tipo="otro",
+                        descripcion=f"Mensaje fuera de horario de {paciente.nombre} {paciente.apellidos}: \"{contenido[:80]}\""
+                    ))
+                db.commit()
+                db.refresh(msg)
+
+                payload_out = {
+                    "id": msg.id, "emisor": "paciente",
+                    "contenido": contenido,
+                    "created_at": msg.created_at.isoformat(),
+                    "paciente_id": paciente.id,
+                    "paciente_nombre": f"{paciente.nombre} {paciente.apellidos}",
+                    "fuera_horario": fuera,
+                }
+                # Enviar al médico si está conectado
+                medico_usuario = db.query(Medico).filter(Medico.id == medico_id).first()
+                if medico_usuario:
+                    await manager.send(medico_usuario.usuario_id, payload_out)
+                # Confirmar al paciente
+                await manager.send(user_id, {**payload_out, "confirmado": True})
+
+            elif usuario.rol.value == "medico":
+                medico = usuario.medico
+                paciente_id = data.get("paciente_id")
+                if not paciente_id or not medico: continue
+
+                paciente = db.query(Paciente).filter(
+                    Paciente.id == paciente_id,
+                    Paciente.medico_id == medico.id
+                ).first()
+                if not paciente: continue
+
+                msg = Mensaje(
+                    paciente_id=paciente.id, medico_id=medico.id,
+                    emisor=EmisorEnum.medico, contenido=contenido,
+                    leido=False
+                )
+                db.add(msg)
+                db.commit()
+                db.refresh(msg)
+
+                payload_out = {
+                    "id": msg.id, "emisor": "medico",
+                    "contenido": contenido,
+                    "created_at": msg.created_at.isoformat(),
+                    "paciente_id": paciente.id,
+                    "fuera_horario": False,
+                    "confirmado": True,
+                }
+                # Enviar al paciente si está conectado
+                await manager.send(paciente.usuario_id, payload_out)
+                # Confirmar al médico
+                await manager.send(user_id, payload_out)
+
+    except WebSocketDisconnect:
+        manager.disconnect(user_id)
+
+
+# ── REST: historial de mensajes ───────────────
+class MensajeOut(BaseModel):
+    id:           int
+    emisor:       str
+    contenido:    str
+    leido:        bool
+    fuera_horario:bool
+    created_at:   datetime
+    model_config = {"from_attributes": True}
+
+@app.get("/chat/{paciente_id}/mensajes", response_model=List[MensajeOut], tags=["Chat"])
+def get_mensajes(
+    paciente_id: int,
+    limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    paciente = get_paciente_or_404(paciente_id, db)
+    mensajes = (
+        db.query(Mensaje)
+        .filter(Mensaje.paciente_id == paciente_id)
+        .order_by(Mensaje.created_at.asc())
+        .limit(limit)
+        .all()
+    )
+    # Marcar como leídos
+    if current_user.rol.value == "medico":
+        db.query(Mensaje).filter(
+            Mensaje.paciente_id == paciente_id,
+            Mensaje.emisor == EmisorEnum.paciente,
+            Mensaje.leido == False
+        ).update({"leido": True})
+    elif current_user.rol.value == "paciente":
+        db.query(Mensaje).filter(
+            Mensaje.paciente_id == paciente_id,
+            Mensaje.emisor == EmisorEnum.medico,
+            Mensaje.leido == False
+        ).update({"leido": True})
+    db.commit()
+    return mensajes
+
+
+@app.get("/chat/medico/conversaciones", tags=["Chat"])
+def get_conversaciones(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Lista de pacientes con su último mensaje y count de no leídos."""
+    medico = get_medico_or_403(current_user)
+    pacientes = db.query(Paciente).filter(Paciente.medico_id == medico.id).all()
+
+    result = []
+    for p in pacientes:
+        ultimo = db.query(Mensaje).filter(
+            Mensaje.paciente_id == p.id
+        ).order_by(Mensaje.created_at.desc()).first()
+
+        no_leidos = db.query(Mensaje).filter(
+            Mensaje.paciente_id == p.id,
+            Mensaje.emisor == EmisorEnum.paciente,
+            Mensaje.leido == False
+        ).count()
+
+        result.append({
+            "paciente_id":    p.id,
+            "nombre":         f"{p.nombre} {p.apellidos}",
+            "iniciales":      f"{p.nombre[0]}{p.apellidos[0]}".upper(),
+            "ultimo_mensaje": ultimo.contenido[:60] if ultimo else None,
+            "ultimo_at":      ultimo.created_at.isoformat() if ultimo else None,
+            "ultimo_emisor":  ultimo.emisor.value if ultimo else None,
+            "no_leidos":      no_leidos,
+        })
+
+    # Ordenar por último mensaje más reciente
+    result.sort(key=lambda x: x["ultimo_at"] or "", reverse=True)
+    return result
+
+
+# ── REST: horario médico ──────────────────────
+class HorarioIn(BaseModel):
+    horarios: List[dict]  # [{dia, hora_inicio, hora_fin, activo}]
+
+@app.get("/medico/horario", tags=["Chat"])
+def get_horario(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    horarios = db.query(HorarioMedico).filter(HorarioMedico.medico_id == medico.id).all()
+    return [{"dia": h.dia_semana.value, "hora_inicio": str(h.hora_inicio)[:5],
+             "hora_fin": str(h.hora_fin)[:5], "activo": h.activo} for h in horarios]
+
+
+@app.post("/medico/horario", tags=["Chat"])
+def save_horario(
+    data: HorarioIn,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    for h in data.horarios:
+        dia = DiaSemanaEnum(h["dia"])
+        existente = db.query(HorarioMedico).filter(
+            HorarioMedico.medico_id == medico.id,
+            HorarioMedico.dia_semana == dia
+        ).first()
+        hi = dtime.fromisoformat(h["hora_inicio"])
+        hf = dtime.fromisoformat(h["hora_fin"])
+        if existente:
+            existente.hora_inicio = hi
+            existente.hora_fin    = hf
+            existente.activo      = h.get("activo", True)
+        else:
+            db.add(HorarioMedico(
+                medico_id=medico.id, dia_semana=dia,
+                hora_inicio=hi, hora_fin=hf, activo=h.get("activo", True)
+            ))
+    db.commit()
+    return {"ok": True}
+
+
+@app.get("/chat/paciente/horario", tags=["Chat"])
+def get_horario_para_paciente(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """Devuelve si el médico del paciente está disponible ahora + su horario."""
+    paciente = current_user.paciente
+    if not paciente or not paciente.medico_id:
+        return {"disponible": False, "horario": []}
+
+    disponible = esta_en_horario(paciente.medico_id, db)
+    horarios = db.query(HorarioMedico).filter(
+        HorarioMedico.medico_id == paciente.medico_id,
+        HorarioMedico.activo == True
+    ).all()
+    return {
+        "disponible": disponible,
+        "medico_nombre": f"Dr. {paciente.medico.nombre} {paciente.medico.apellidos}" if paciente.medico else "",
+        "horario": [{"dia": h.dia_semana.value, "hora_inicio": str(h.hora_inicio)[:5],
+                     "hora_fin": str(h.hora_fin)[:5]} for h in horarios]
+    }

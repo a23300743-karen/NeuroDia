@@ -36,6 +36,11 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         Vincular Paciente
       </a>
+      <a href="#" class="nav-item" id="nav-chat" onclick="showView('chat');return false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+        <span class="nav-badge" id="nav-chat-count" style="display:none"></span>
+      </a>
     </nav>
     <div class="sidebar-footer">
       <div class="user-chip">
@@ -316,10 +321,91 @@
       </div>
     </div>
 
+
+<!-- ══ VIEW: CHAT ══ -->
+    <div id="view-chat" style="display:none;position:fixed;top:0;left:240px;right:0;bottom:0;z-index:50;background:var(--p8)">
+
+      <!-- Modal horario -->
+      <div id="modal-horario" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center">
+        <div style="background:white;border-radius:16px;padding:28px;width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-family:var(--font-display);font-size:18px;color:var(--p1)">Horario de atención</h3>
+            <button onclick="ChatMedico.cerrarHorario()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:20px">×</button>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Los mensajes fuera de este horario te llegarán como alerta al día siguiente.</p>
+          <div id="horario-form-body"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+            <button onclick="ChatMedico.cerrarHorario()" class="btn-cancel">Cancelar</button>
+            <button id="horario-save-btn" onclick="ChatMedico.guardarHorario()" class="btn-primary-purple">Guardar horario</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;height:100%;flex-direction:column">
+        <!-- Header chat -->
+        <div style="padding:16px 24px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div>
+            <h2 style="font-family:var(--font-display);font-size:18px;color:var(--p1)">Chat con pacientes</h2>
+            <p style="font-size:12px;color:var(--text-muted)">Conversaciones en tiempo real</p>
+          </div>
+          <button class="btn-edit" onclick="ChatMedico.abrirHorario()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Configurar horario
+          </button>
+        </div>
+
+        <!-- Body chat -->
+        <div style="display:flex;flex:1;overflow:hidden">
+
+          <!-- Lista conversaciones -->
+          <div style="width:280px;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0">
+            <div style="padding:12px;border-bottom:1px solid var(--border)">
+              <input type="text" placeholder="Buscar paciente..." oninput="filterConvs(this.value)"
+                style="width:100%;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;font-family:var(--font-body);background:var(--p8);outline:none">
+            </div>
+            <div id="chat-conv-list" style="flex:1;overflow-y:auto"></div>
+          </div>
+
+          <!-- Panel conversación activa -->
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+            <!-- Empty state -->
+            <div id="chat-panel-empty" style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text-muted)">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <p style="font-size:13px">Selecciona una conversación</p>
+            </div>
+
+            <!-- Conversación activa -->
+            <div id="chat-panel-activo" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+              <div style="padding:14px 20px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0">
+                <div id="chat-panel-avatar" class="res-avatar" style="width:38px;height:38px;font-size:13px">--</div>
+                <div>
+                  <div id="chat-panel-nombre" style="font-weight:600;font-size:14px;color:var(--p1)">—</div>
+                  <div id="chat-panel-status" style="font-size:11px;color:var(--text-muted)">Paciente</div>
+                </div>
+              </div>
+              <div id="chat-panel-mensajes" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:6px;background:var(--p8)"></div>
+              <div style="padding:12px 16px;background:white;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center">
+                <input type="text" id="chat-msg-input" placeholder="Escribe un mensaje..." maxlength="500"
+                  onkeydown="if(event.key==='Enter')ChatMedico.enviar()"
+                  style="flex:1;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;font-family:var(--font-body);background:var(--p8);outline:none;transition:border-color 150ms">
+                <button onclick="ChatMedico.enviar()"
+                  style="width:40px;height:40px;border-radius:50%;background:var(--p2);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/chat-medico.js"></script>
 <script src="js/dashboard_medico.js" defer></script>
 </body>
 </html>

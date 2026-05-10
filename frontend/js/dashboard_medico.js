@@ -29,13 +29,17 @@ function showView(name) {
     const el = document.getElementById(`view-${v}`);
     if (el) el.style.display = v === name ? 'block' : 'none';
   });
+  const chatView = document.getElementById('view-chat');
+  if (chatView) chatView.style.display = name === 'chat' ? 'block' : 'none';
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const navMap = { resumen: 'nav-dashboard', pacientes: 'nav-pacientes', alertas: 'nav-alertas', alta: 'nav-alta', detalle: 'nav-pacientes' };
+  const navMap = { resumen: 'nav-dashboard', pacientes: 'nav-pacientes', alertas: 'nav-alertas', alta: 'nav-alta', detalle: 'nav-pacientes', chat: 'nav-chat' };
   const navEl = document.getElementById(navMap[name]);
   if (navEl) navEl.classList.add('active');
   if (name === 'pacientes') renderTablaPacientes(pacientesData);
   if (name === 'alertas') renderAlertasView();
+  if (name === 'chat') setTimeout(() => ChatMedico.cargarConversaciones(), 50);
 }
+
 
 /* ── DASHBOARD KPIs ── */
 async function loadDashboard() {
@@ -381,6 +385,8 @@ function resetAltaForm() {
   if (!stored) { window.location.href = "index.html"; return; }
   currentUser = JSON.parse(stored);
   if (currentUser.rol !== 'medico') { window.location.href = "perfil.html"; return; }
+
+    ChatMedico.conectar(currentUser);
 
   const iniciales = `${currentUser.nombre?.[0] || ''}${currentUser.apellidos?.[0] || ''}`.toUpperCase();
   document.getElementById("sidebar-avatar").textContent = iniciales || 'Dr';

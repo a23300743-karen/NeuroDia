@@ -219,3 +219,52 @@ class Alerta(Base):
 
     paciente = relationship("Paciente", back_populates="alertas")
     medico   = relationship("Medico",   back_populates="alertas")
+
+# ══════════════════════════════════════════════
+# CHAT
+# ══════════════════════════════════════════════
+
+class EmisorEnum(str, enum.Enum):
+    paciente = "paciente"
+    medico   = "medico"
+
+class DiaSemanaEnum(str, enum.Enum):
+    lunes     = "lunes"
+    martes    = "martes"
+    miercoles = "miercoles"
+    jueves    = "jueves"
+    viernes   = "viernes"
+    sabado    = "sabado"
+    domingo   = "domingo"
+
+class Mensaje(Base):
+    __tablename__ = "mensajes"
+
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    paciente_id = Column(Integer, ForeignKey("pacientes.id", ondelete="CASCADE"), nullable=False)
+    medico_id   = Column(Integer, ForeignKey("medicos.id",   ondelete="CASCADE"), nullable=False)
+    emisor      = Column(Enum(EmisorEnum), nullable=False)
+    contenido   = Column(Text, nullable=False)
+    leido       = Column(Boolean, nullable=False, default=False)
+    fuera_horario = Column(Boolean, nullable=False, default=False)
+    created_at  = Column(DateTime, server_default=func.now(), nullable=False)
+
+    paciente = relationship("Paciente", foreign_keys=[paciente_id])
+    medico   = relationship("Medico",   foreign_keys=[medico_id])
+
+
+class HorarioMedico(Base):
+    __tablename__ = "horario_medico"
+
+    id          = Column(Integer, primary_key=True, autoincrement=True)
+    medico_id   = Column(Integer, ForeignKey("medicos.id", ondelete="CASCADE"), nullable=False)
+    dia_semana  = Column(Enum(DiaSemanaEnum), nullable=False)
+    hora_inicio = Column(Time, nullable=False)
+    hora_fin    = Column(Time, nullable=False)
+    activo      = Column(Boolean, nullable=False, default=True)
+
+    medico = relationship("Medico", foreign_keys=[medico_id])
+
+    __table_args__ = (
+        UniqueConstraint("medico_id", "dia_semana", name="uq_horario_medico_dia"),
+    )
