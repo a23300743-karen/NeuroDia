@@ -202,3 +202,27 @@
 @media (max-width: 700px) {
   .kpi-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Formulario vincular paciente ── */
+.form-section-title {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .6px; margin-bottom: 16px;
+}
+
+.paciente-encontrado-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--success-bg);
+  border: 1px solid rgba(45,110,69,.15);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.page-alert {
+  padding: 11px 14px; border-radius: var(--radius-md);
+  font-size: 13px; background: var(--error-bg);
+  color: var(--error); border: 1px solid rgba(163,45,45,.15);
+}
+
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
+}

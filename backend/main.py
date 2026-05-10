@@ -115,7 +115,7 @@ class PerfilOut(BaseModel):
     hba1c:            Optional[Decimal]
     grupo_estudio:    Optional[str]
     consentimiento:   bool
-    verificado:      bool
+    verificado:       bool
     model_config = {"from_attributes": True}
 
 
@@ -216,15 +216,11 @@ async def get_current_user(
                         headers={"WWW-Authenticate": "Bearer"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print("TOKEN PAYLOAD:", payload)          # ← agregar esta línea
         user_id = int(payload.get("sub"))
-        print("USER ID:", user_id)                # ← y esta
         if user_id is None: raise exc
-    except JWTError as e:
-        print("JWT ERROR:", e)                    # ← y esta
+    except JWTError:
         raise exc
     user = db.query(Usuario).filter(Usuario.id == user_id).first()
-    print("USER FOUND:", user)                    # ← y esta
     if not user: raise exc
     return user
 
@@ -296,7 +292,7 @@ def login(creds: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(403, f"Esta cuenta no tiene acceso como '{creds.role}'.")
 
     perfil = usuario.medico or usuario.paciente
-    token  = create_access_token({"sub": str(usuario.id), "rol": usuario.rol.value})
+    token = create_access_token({"sub": str(usuario.id), "rol": usuario.rol.value})
     return TokenResponse(access_token=token, token_type="bearer", user=build_user_public(usuario, perfil))
 
 
@@ -855,6 +851,109 @@ def vincular_paciente(
         raise HTTPException(409, "Este paciente ya está en tu panel.")
 
     paciente.medico_id = medico.id
+    db.commit()
+    db.refresh(paciente)
+
+    alertas_n = db.query(Alerta).filter(Alerta.paciente_id == paciente.id, Alerta.resuelta == False).count()
+    return PacienteResumenOut(
+        id=paciente.id, nombre=paciente.nombre, apellidos=paciente.apellidos,
+        tipo_diabetes=paciente.tipo_diabetes.value if paciente.tipo_diabetes else None,
+        hba1c=paciente.hba1c, anios_diagnostico=paciente.anios_diagnostico,
+        verificado=paciente.verificado, consentimiento=paciente.consentimiento,
+        alertas_activas=alertas_n,
+    )
+
+
+# ── Buscar paciente por correo (para precargar formulario) ─────
+class PacienteBusquedaOut(BaseModel):
+    usuario_id:       int
+    paciente_id:      Optional[int]   # None si aún no tiene perfil de paciente
+    email:            str
+    nombre:           str
+    apellidos:        str
+    tipo_diabetes:    Optional[str]   = None
+    anios_diagnostico:Optional[int]   = None
+    hba1c:            Optional[Decimal] = None
+    grupo_estudio:    Optional[str]   = None
+    consentimiento:   bool            = False
+    ya_asignado:      bool            = False  # True si ya es paciente de este médico
+
+@app.get("/medico/buscar-paciente", response_model=PacienteBusquedaOut, tags=["Médico"])
+def buscar_paciente_por_correo(
+    email: str,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        raise HTTPException(404, "No existe ningún usuario con ese correo.")
+    if usuario.rol.value != "paciente":
+        raise HTTPException(400, "Ese correo no corresponde a una cuenta de paciente.")
+
+    paciente = db.query(Paciente).filter(Paciente.usuario_id == usuario.id).first()
+
+    if paciente and paciente.medico_id and paciente.medico_id != medico.id:
+        raise HTTPException(409, "Este paciente ya está asignado a otro médico.")
+
+    return PacienteBusquedaOut(
+        usuario_id        = usuario.id,
+        paciente_id       = paciente.id if paciente else None,
+        email             = usuario.email,
+        nombre            = paciente.nombre if paciente else "",
+        apellidos         = paciente.apellidos if paciente else "",
+        tipo_diabetes     = paciente.tipo_diabetes.value if paciente and paciente.tipo_diabetes else None,
+        anios_diagnostico = paciente.anios_diagnostico if paciente else None,
+        hba1c             = paciente.hba1c if paciente else None,
+        grupo_estudio     = paciente.grupo_estudio if paciente else None,
+        consentimiento    = paciente.consentimiento if paciente else False,
+        ya_asignado       = paciente.medico_id == medico.id if paciente else False,
+    )
+
+
+# ── Vincular + actualizar datos clínicos ──────────────────────
+class VincularConDatosIn(BaseModel):
+    email:            EmailStr
+    tipo_diabetes:    Optional[str]    = None
+    anios_diagnostico:Optional[int]    = None
+    hba1c:            Optional[Decimal] = None
+    grupo_estudio:    Optional[str]    = None
+    consentimiento:   bool             = False
+
+@app.post("/medico/vincular-paciente", response_model=PacienteResumenOut, tags=["Médico"])
+def vincular_paciente(
+    data: VincularConDatosIn,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+
+    usuario = db.query(Usuario).filter(Usuario.email == data.email).first()
+    if not usuario:
+        raise HTTPException(404, "No existe ningún usuario con ese correo.")
+    if usuario.rol.value != "paciente":
+        raise HTTPException(400, "Ese correo no corresponde a una cuenta de paciente.")
+
+    paciente = db.query(Paciente).filter(Paciente.usuario_id == usuario.id).first()
+    if not paciente:
+        raise HTTPException(404, "El usuario no tiene perfil de paciente.")
+    if paciente.medico_id and paciente.medico_id != medico.id:
+        raise HTTPException(409, "Este paciente ya está asignado a otro médico.")
+
+    # Asignar médico y actualizar datos clínicos
+    paciente.medico_id = medico.id
+    if data.tipo_diabetes:
+        from backend.models import DiabetesEnum
+        paciente.tipo_diabetes = DiabetesEnum(data.tipo_diabetes)
+    if data.anios_diagnostico is not None:
+        paciente.anios_diagnostico = data.anios_diagnostico
+    if data.hba1c is not None:
+        paciente.hba1c = data.hba1c
+    if data.grupo_estudio:
+        paciente.grupo_estudio = data.grupo_estudio
+    paciente.consentimiento = data.consentimiento
+
     db.commit()
     db.refresh(paciente)
 

@@ -272,17 +272,71 @@ function renderAlertasView() {
   `).join('');
 }
 
-/* ── VINCULAR PACIENTE ── */
-document.getElementById("alta-form").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  document.querySelectorAll('.field-error').forEach(el => el.textContent = '');
-  document.getElementById("alta-error").style.display = 'none';
+/* ── BUSCAR PACIENTE ── */
+let pacienteEncontrado = null;
 
+async function buscarPaciente() {
   const email = document.getElementById("alta-email").value.trim();
+  document.getElementById("err-alta-email").textContent = '';
+  document.getElementById("alta-error-buscar").style.display = 'none';
+  document.getElementById("alta-paso2").style.display = 'none';
+  pacienteEncontrado = null;
+
   if (!email) {
     document.getElementById("err-alta-email").textContent = "Ingresa el correo del paciente.";
     return;
   }
+
+  const btn = document.getElementById("buscar-btn");
+  btn.disabled = true;
+  document.getElementById("buscar-btn-text").style.display = "none";
+  document.getElementById("buscar-btn-loader").style.display = "inline";
+
+  try {
+    const res = await authFetch(`${API_BASE}/medico/buscar-paciente?email=${encodeURIComponent(email)}`);
+    if (res && res.ok) {
+      pacienteEncontrado = await res.json();
+      // Precargar datos
+      const iniciales = `${pacienteEncontrado.nombre?.[0] || ''}${pacienteEncontrado.apellidos?.[0] || ''}`.toUpperCase();
+      document.getElementById("alta-avatar").textContent = iniciales || '?';
+      document.getElementById("alta-nombre-display").textContent = `${pacienteEncontrado.nombre} ${pacienteEncontrado.apellidos}`;
+      document.getElementById("alta-email-display").textContent = pacienteEncontrado.email;
+      if (pacienteEncontrado.tipo_diabetes) document.getElementById("alta-diabetes").value = pacienteEncontrado.tipo_diabetes;
+      if (pacienteEncontrado.anios_diagnostico) document.getElementById("alta-anios").value = pacienteEncontrado.anios_diagnostico;
+      if (pacienteEncontrado.hba1c) document.getElementById("alta-hba1c").value = pacienteEncontrado.hba1c;
+      if (pacienteEncontrado.grupo_estudio) document.getElementById("alta-grupo").value = pacienteEncontrado.grupo_estudio;
+      document.getElementById("alta-consentimiento").checked = pacienteEncontrado.consentimiento;
+      document.getElementById("alta-paso2").style.display = 'block';
+    } else {
+      const err = res ? await res.json() : {};
+      document.getElementById("alta-error-buscar").textContent = err.detail || "No se pudo buscar al paciente.";
+      document.getElementById("alta-error-buscar").style.display = 'block';
+    }
+  } finally {
+    btn.disabled = false;
+    document.getElementById("buscar-btn-text").style.display = "inline";
+    document.getElementById("buscar-btn-loader").style.display = "none";
+  }
+}
+
+// Buscar también con Enter
+document.getElementById("alta-email").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); buscarPaciente(); }
+});
+
+/* ── VINCULAR PACIENTE ── */
+async function vincularPaciente() {
+  if (!pacienteEncontrado) return;
+  document.getElementById("alta-error").style.display = 'none';
+
+  const payload = {
+    email:             pacienteEncontrado.email,
+    tipo_diabetes:     document.getElementById("alta-diabetes").value,
+    anios_diagnostico: parseInt(document.getElementById("alta-anios").value) || null,
+    hba1c:             parseFloat(document.getElementById("alta-hba1c").value) || null,
+    grupo_estudio:     document.getElementById("alta-grupo").value.trim() || null,
+    consentimiento:    document.getElementById("alta-consentimiento").checked,
+  };
 
   const btn = document.getElementById("alta-btn");
   btn.disabled = true;
@@ -290,30 +344,35 @@ document.getElementById("alta-form").addEventListener("submit", async function(e
   document.getElementById("alta-btn-loader").style.display = "inline";
 
   try {
-    const res = await authFetch(`${API_BASE}/medico/vincular-paciente`, { method: 'POST', body: JSON.stringify({ email }) });
+    const res = await authFetch(`${API_BASE}/medico/vincular-paciente`, { method: 'POST', body: JSON.stringify(payload) });
     if (res && res.ok) {
       const paciente = await res.json();
       document.getElementById("alta-success-nombre").textContent = `${paciente.nombre} ${paciente.apellidos}`;
-      document.getElementById("alta-form").style.display = "none";
-      document.getElementById("alta-success").style.display = "block";
+      document.getElementById("alta-paso1").style.display = 'none';
+      document.getElementById("alta-paso2").style.display = 'none';
+      document.getElementById("alta-success").style.display = 'block';
       await loadPacientes();
       await loadDashboard();
     } else {
       const err = res ? await res.json() : {};
-      document.getElementById("alta-error").textContent = err.detail || "Error al vincular. Intenta de nuevo.";
-      document.getElementById("alta-error").style.display = "block";
+      document.getElementById("alta-error").textContent = err.detail || "Error al vincular.";
+      document.getElementById("alta-error").style.display = 'block';
     }
   } finally {
     btn.disabled = false;
     document.getElementById("alta-btn-text").style.display = "inline";
     document.getElementById("alta-btn-loader").style.display = "none";
   }
-});
+}
 
 function resetAltaForm() {
-  document.getElementById("alta-form").reset();
-  document.getElementById("alta-form").style.display = "block";
-  document.getElementById("alta-success").style.display = "none";
+  document.getElementById("alta-email").value = '';
+  document.getElementById("alta-paso1").style.display = 'block';
+  document.getElementById("alta-paso2").style.display = 'none';
+  document.getElementById("alta-success").style.display = 'none';
+  document.getElementById("alta-error-buscar").style.display = 'none';
+  document.getElementById("alta-error").style.display = 'none';
+  pacienteEncontrado = null;
 }
 
 /* ── INIT ── */
