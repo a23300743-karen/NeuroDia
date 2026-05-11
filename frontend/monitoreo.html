@@ -230,6 +230,443 @@
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.Scloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+const API_BASE = "http://localhost:8000";
+let currentUser = null;
+let glucosaChartInstance = null;
+let dolorChartInstance = null;
+let historialData = [];
+
+/* ── AUTH ── */
+function getToken() {
+  return localStorage.getItem("nd_token") || sessionStorage.getItem("nd_token");
+}
+
+function logout() {
+  localStorage.removeItem("nd_token"); localStorage.removeItem("nd_user");
+  sessionStorage.removeItem("nd_token"); sessionStorage.removeItem("nd_user");
+  window.location.href = "index.html";
+}
+
+async function authFetch(url, options = {}) {
+  const token = getToken();
+  if (!token) { window.location.href = "index.html"; return; }
+  return fetch(url, {
+    ...options,
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", ...(options.headers || {}) }
+  });
+}
+
+/* ── INIT ── */
+
+
+/* ── HISTORIAL ── */
+async function loadHistorial() {
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/registros?limit=14`);
+    if (!res || !res.ok) { renderHistorialEmpty(); return; }
+    historialData = await res.json();
+    renderHistorialTable(historialData);
+    renderGlucosaChart(historialData);
+    renderDolorChart(historialData);
+    updateStats(historialData);
+  } catch(e) {
+    renderHistorialEmpty();
+  }
+}
+
+function renderHistorialEmpty() {
+  document.getElementById("history-tbody").innerHTML =
+    `<tr><td colspan="5"><div class="empty-state">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <p>No hay registros todavía. ¡Empieza hoy!</p>
+    </div></td></tr>`;
+  renderGlucosaChart([]);
+  renderDolorChart([]);
+}
+
+function renderHistorialTable(data) {
+  const tbody = document.getElementById("history-tbody");
+  if (!data.length) { renderHistorialEmpty(); return; }
+
+  const momentoLabel = { ayunas: 'Ayunas', postprandial: 'Postprandial', nocturno: 'Nocturno' };
+  const estadoBadge = {
+    completo:   '<span class="badge badge-ok">Completo</span>',
+    incompleto: '<span class="badge badge-warn">Incompleto</span>',
+    pendiente:  '<span class="badge badge-muted">Pendiente</span>'
+  };
+
+  tbody.innerHTML = data.slice(0, 10).map(r => {
+    const g = r.glucosa_valor ? `${r.glucosa_valor} <small>mg/dL</small>` : '—';
+    const gClass = r.glucosa_valor > 180 ? 'color:var(--error)' : r.glucosa_valor < 70 ? 'color:var(--warning)' : '';
+    const d = r.dolor_intensidad !== null ? r.dolor_intensidad : '—';
+    const dClass = r.dolor_intensidad >= 7 ? 'color:var(--error)' : r.dolor_intensidad >= 4 ? 'color:var(--warning)' : '';
+    const fecha = new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+    return `<tr>
+      <td>${fecha}</td>
+      <td style="${gClass}">${g}</td>
+      <td>${momentoLabel[r.glucosa_momento] || '—'}</td>
+      <td style="${dClass}">${d}/10</td>
+      <td>${estadoBadge[r.estado] || ''}</td>
+    </tr>`;
+  }).join('');
+
+  // Update month count
+  const thisMonth = data.filter(r => new Date(r.fecha).getMonth() === new Date().getMonth());
+  document.getElementById("stat-registros").textContent = thisMonth.length;
+}
+
+function updateStats(data) {
+  if (!data.length) return;
+  const last = data[0];
+  if (last.glucosa_valor) {
+    document.getElementById("stat-glucosa").textContent = `${last.glucosa_valor}`;
+    document.getElementById("stat-glucosa-sub").textContent = last.glucosa_momento || '';
+  }
+  if (last.dolor_intensidad !== null) {
+    document.getElementById("stat-dolor").textContent = `${last.dolor_intensidad}/10`;
+  }
+}
+
+/* ── CHARTS ── */
+function renderGlucosaChart(data) {
+  const ctx = document.getElementById('glucosaChart').getContext('2d');
+  if (glucosaChartInstance) glucosaChartInstance.destroy();
+
+  const recent = [...data].reverse().slice(-7);
+  const labels = recent.map(r => {
+    const d = new Date(r.fecha + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+  });
+  const values = recent.map(r => r.glucosa_valor || null);
+
+  glucosaChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['Sin datos'],
+      datasets: [{
+        label: 'Glucosa (mg/dL)',
+        data: values.length ? values : [null],
+        borderColor: '#706fa1', backgroundColor: 'rgba(112,111,161,.1)',
+        tension: 0.4, fill: true, pointRadius: 4, pointBackgroundColor: '#4a4888',
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8a8aaa' } },
+        y: {
+          grid: { color: '#f0eff9' }, ticks: { font: { size: 11 }, color: '#8a8aaa' },
+          suggestedMin: 60, suggestedMax: 200
+        }
+      }
+    }
+  });
+}
+
+function renderDolorChart(data) {
+  const ctx = document.getElementById('dolorChart').getContext('2d');
+  if (dolorChartInstance) dolorChartInstance.destroy();
+
+  const recent = [...data].reverse().slice(-7);
+  const labels = recent.map(r => {
+    const d = new Date(r.fecha + 'T12:00:00');
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+  });
+  const values = recent.map(r => r.dolor_intensidad !== null ? r.dolor_intensidad : null);
+
+  dolorChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.length ? labels : ['Sin datos'],
+      datasets: [{
+        label: 'Dolor',
+        data: values.length ? values : [null],
+        backgroundColor: values.map(v => v >= 7 ? 'rgba(163,45,45,.5)' : v >= 4 ? 'rgba(212,160,23,.5)' : 'rgba(45,110,69,.4)'),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#8a8aaa' } },
+        y: { min: 0, max: 10, grid: { color: '#f0eff9' }, ticks: { font: { size: 11 }, color: '#8a8aaa' } }
+      }
+    }
+  });
+}
+
+/* ── ALERTAS ── */
+async function loadAlertas() {
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/alertas`);
+    if (!res || !res.ok) return;
+    const alertas = await res.json();
+    renderAlertas(alertas);
+  } catch(e) { /* sin conexión, mostrar vacío */ }
+}
+
+const alertaTipo = {
+  glucosa_alta:    { icon: '🩸', label: 'Glucosa elevada', color: 'red' },
+  glucosa_baja:    { icon: '⬇️', label: 'Glucosa baja', color: 'yellow' },
+  dolor_severo:    { icon: '😣', label: 'Dolor severo', color: 'red' },
+  baja_adherencia: { icon: '💊', label: 'Baja adherencia', color: 'yellow' },
+  otro:            { icon: '📋', label: 'Aviso médico', color: 'blue' },
+};
+
+function renderAlertas(alertas) {
+  const list = document.getElementById("alertas-list");
+  const noResueltas = alertas.filter(a => !a.resuelta);
+
+  if (noResueltas.length) {
+    document.getElementById("alert-count").style.display = 'inline-flex';
+    document.getElementById("alert-count").textContent = `${noResueltas.length} nueva${noResueltas.length > 1 ? 's' : ''}`;
+  }
+
+  if (!alertas.length) {
+    list.innerHTML = `<div class="empty-state">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <p>Sin alertas activas. ¡Sigue así!</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = alertas.slice(0, 5).map(a => {
+    const t = alertaTipo[a.tipo] || alertaTipo.otro;
+    const fecha = new Date(a.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `<div class="alert-item">
+      <div class="alert-dot ${t.color}"></div>
+      <div class="alert-body">
+        <h5>${t.icon} ${t.label}${a.resuelta ? ' <span class="badge badge-ok" style="font-size:11px">Resuelta</span>' : ''}</h5>
+        <p>${a.descripcion}</p>
+        <div class="alert-time">${fecha}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── PAIN SLIDER ── */
+const painLabels = ['Sin dolor','Muy leve','Leve','Leve moderado','Moderado','Moderado','Moderado intenso','Intenso','Muy intenso','Severo','Insoportable'];
+document.getElementById("dolor-slider").addEventListener("input", function() {
+  const v = parseInt(this.value);
+  document.getElementById("pain-display").textContent = v;
+  document.getElementById("pain-label").textContent = painLabels[v];
+  document.getElementById("dolor-loc-group").style.display = v > 0 ? 'block' : 'none';
+});
+
+/* ── FORM SUBMIT ── */
+document.getElementById("registroForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  // Validate
+  let valid = true;
+  const glucosaVal = parseFloat(document.getElementById("glucosa-valor").value);
+  const momento = document.getElementById("glucosa-momento").value;
+  const dolor = parseInt(document.getElementById("dolor-slider").value);
+
+  document.querySelectorAll(".field-error-msg").forEach(el => el.classList.remove("show"));
+  document.querySelectorAll("input.has-error, select.has-error").forEach(el => el.classList.remove("has-error"));
+
+  if (!glucosaVal || glucosaVal < 20 || glucosaVal > 600) {
+    document.getElementById("err-glucosa").classList.add("show");
+    document.getElementById("glucosa-valor").classList.add("has-error");
+    valid = false;
+  }
+  if (!momento) {
+    document.getElementById("err-momento").classList.add("show");
+    document.getElementById("glucosa-momento").classList.add("has-error");
+    valid = false;
+  }
+  if (!valid) return;
+
+  // Collect chips
+  const localizaciones = [...document.querySelectorAll(".chip-input[id^='loc-']:checked")].map(c => c.value);
+  const sintomas = [...document.querySelectorAll(".chip-input[id^='s-']:checked")].map(c => c.value);
+
+  // Build payload
+  const today = new Date().toISOString().split('T')[0];
+  const payload = {
+    fecha: today,
+    glucosa_valor: glucosaVal,
+    glucosa_momento: momento,
+    dolor_intensidad: dolor,
+    notas: document.getElementById("notas").value.trim() || null,
+    localizaciones,
+    sintomas
+  };
+
+  // Loading state
+  document.getElementById("btn-text").style.display = "none";
+  document.getElementById("btn-loader").style.display = "flex";
+  document.getElementById("submit-btn").disabled = true;
+
+  try {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/registros`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    if (res && res.ok) {
+      const data = await res.json();
+
+      // Check alerts triggered
+      checkLocalAlerts(glucosaVal, dolor);
+
+      // Show success
+      document.getElementById("registroForm").style.display = "none";
+      document.getElementById("form-success").classList.add("show");
+
+      // Refresh data
+      await loadHistorial();
+    } else {
+      const err = res ? await res.json() : {};
+      const msg = err.detail || "Error al guardar. Intenta de nuevo.";
+      showBannerAlert("error", "No se pudo guardar", msg);
+    }
+  } catch(err) {
+    // Fallback: save locally for demo
+    saveLocalDemo(payload);
+  } finally {
+    document.getElementById("btn-text").style.display = "inline";
+    document.getElementById("btn-loader").style.display = "none";
+    document.getElementById("submit-btn").disabled = false;
+  }
+});
+
+/* ── LOCAL DEMO FALLBACK (cuando no hay API) ── */
+function saveLocalDemo(payload) {
+  const stored = JSON.parse(localStorage.getItem("nd_registros") || "[]");
+  stored.unshift({ ...payload, id: Date.now(), estado: 'completo' });
+  localStorage.setItem("nd_registros", JSON.stringify(stored.slice(0, 30)));
+
+  checkLocalAlerts(payload.glucosa_valor, payload.dolor_intensidad);
+
+  document.getElementById("registroForm").style.display = "none";
+  document.getElementById("form-success").classList.add("show");
+
+  // Refresh from local
+  historialData = stored;
+  renderHistorialTable(stored);
+  renderGlucosaChart(stored);
+  renderDolorChart(stored);
+  updateStats(stored);
+}
+
+function loadLocalDemo() {
+  const stored = JSON.parse(localStorage.getItem("nd_registros") || "[]");
+  if (stored.length) {
+    historialData = stored;
+    renderHistorialTable(stored);
+    renderGlucosaChart(stored);
+    renderDolorChart(stored);
+    updateStats(stored);
+  } else {
+    renderHistorialEmpty();
+  }
+}
+
+/* ── ALERT LOGIC ── */
+function checkLocalAlerts(glucosa, dolor) {
+  const alerts = [];
+  if (glucosa > 250) alerts.push({ type: 'error', title: '🚨 Glucosa muy elevada', msg: `Tu glucosa de ${glucosa} mg/dL supera el umbral seguro (>250). Contacta a tu médico.` });
+  else if (glucosa > 180) alerts.push({ type: 'warning', title: '⚠️ Glucosa elevada', msg: `Tu glucosa de ${glucosa} mg/dL está sobre el rango normal (>180). Monitorea con atención.` });
+  else if (glucosa < 70) alerts.push({ type: 'error', title: '⬇️ Glucosa baja (hipoglucemia)', msg: `Tu glucosa de ${glucosa} mg/dL está por debajo del rango mínimo. Consume algo con azúcar.` });
+
+  if (dolor >= 8) alerts.push({ type: 'error', title: '😣 Dolor severo reportado', msg: `Registraste un dolor de ${dolor}/10. Tu médico será notificado.` });
+
+  if (alerts.length) {
+    const first = alerts[0];
+    showBannerAlert(first.type === 'error' ? 'error' : 'warning', first.title, first.msg);
+
+    // Save to local alerts
+    const storedAlerts = JSON.parse(localStorage.getItem("nd_alertas") || "[]");
+    alerts.forEach(a => storedAlerts.unshift({
+      tipo: a.type === 'error' && a.title.includes('Glucosa') ? 'glucosa_alta' : a.type === 'error' ? 'dolor_severo' : 'glucosa_alta',
+      descripcion: a.msg, resuelta: false, created_at: new Date().toISOString()
+    }));
+    localStorage.setItem("nd_alertas", JSON.stringify(storedAlerts.slice(0, 20)));
+    renderAlertas(storedAlerts);
+  }
+}
+
+function showBannerAlert(type, title, msg) {
+  const banner = document.getElementById("alert-banner");
+  document.getElementById("alert-banner-title").textContent = title;
+  document.getElementById("alert-banner-msg").textContent = msg;
+  banner.className = `alert-banner show${type === 'warning' ? ' warning' : ''}`;
+  banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ── RESET FORM ── */
+function resetForm() {
+  document.getElementById("registroForm").reset();
+  document.getElementById("registroForm").style.display = "block";
+  document.getElementById("form-success").classList.remove("show");
+  document.getElementById("pain-display").textContent = "0";
+  document.getElementById("pain-label").textContent = "Sin dolor";
+  document.getElementById("dolor-loc-group").style.display = "none";
+}
+
+/* ── HIST TABS ── */
+function switchHist(tab, btn) {
+  document.querySelectorAll(".hist-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".hist-panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById(`hist-${tab}`).classList.add("active");
+}
+
+/* ── LOAD LOCAL DEMO if no API ── */
+async function tryLoadData() {
+  try {
+    const token = getToken();
+    if (token) {
+      await loadHistorial();
+      await loadAlertas();
+    } else {
+      loadLocalDemo();
+      loadLocalAlerts();
+    }
+  } catch(e) {
+    loadLocalDemo();
+    loadLocalAlerts();
+  }
+}
+
+function loadLocalAlerts() {
+  const stored = JSON.parse(localStorage.getItem("nd_alertas") || "[]");
+  renderAlertas(stored);
+}
+
+/* ── START ── */
+(async function() {
+  // Set date
+  const now = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById("fecha-hoy").textContent = now.toLocaleDateString('es-MX', opts);
+  document.getElementById("registro-fecha-badge").textContent = now.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Try to get user from storage
+  const stored = localStorage.getItem("nd_user") || sessionStorage.getItem("nd_user");
+  if (stored) {
+    currentUser = JSON.parse(stored);
+    document.getElementById("sidebar-nombre").textContent = `${currentUser.nombre} ${currentUser.apellidos || ''}`.trim();
+  } else {
+    document.getElementById("sidebar-nombre").textContent = "Paciente";
+    // Allow demo mode
+  }
+
+  await tryLoadData();
+})();
+</script>
   </main>
 </div>
 <script src="js/chat-burbuja.js"></script>
