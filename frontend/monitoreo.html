@@ -320,7 +320,7 @@ async function authFetch(url, options = {}) {
 /* ── HISTORIAL ── */
 async function loadHistorial() {
   try {
-    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/registros?limit=14`);
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/registros?limit=14`);
     if (!res || !res.ok) { renderHistorialEmpty(); return; }
     historialData = await res.json();
     renderHistorialTable(historialData);
@@ -459,7 +459,7 @@ function renderDolorChart(data) {
 /* ── ALERTAS ── */
 async function loadAlertas() {
   try {
-    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/alertas`);
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/alertas`);
     if (!res || !res.ok) return;
     const alertas = await res.json();
     renderAlertas(alertas);
@@ -561,7 +561,7 @@ document.getElementById("registroForm").addEventListener("submit", async functio
   document.getElementById("submit-btn").disabled = true;
 
   try {
-    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.id}/registros`, {
+    const res = await authFetch(`${API_BASE}/pacientes/${currentUser.perfil_id}/registros`, {
       method: "POST",
       body: JSON.stringify(payload)
     });

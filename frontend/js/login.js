@@ -4,7 +4,7 @@
  * llamadas al API FastAPI, y feedback de UI.
  */
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://localhost:8000";
 
 /* ══════════════════════════════════════════════
    TABS
@@ -118,8 +118,6 @@ function validateRegistroForm() {
   const password2 = document.getElementById("reg-password2").value;
   const rol = document.getElementById("reg-rol").value;
   const terms = document.getElementById("reg-terms").checked;
-  const cedulaEl = document.getElementById("reg-cedula");
-  const cedula = cedulaEl ? cedulaEl.value.trim() : "";
 
   if (!nombre) { showError("err-reg-nombre", "El nombre es obligatorio."); valid = false; }
   if (!apellidos) { showError("err-reg-apellidos", "Los apellidos son obligatorios."); valid = false; }
@@ -196,18 +194,13 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
 
       // Redirigir según rol
       setTimeout(() => {
-        // Obtenemos el rol del objeto user que devuelve tu API (main.py)
-        const rol = data.user.rol; 
-
-        if (rol === 'paciente') {
-            window.location.href = "perfil.html"; 
-        } else if (rol === 'medico') {
-            alert("El panel de médico está en desarrollo.");
-            // window.location.href = "dashboard_medico.html";
-        } else {
-            window.location.href = "index.html";
-        }
-    }, 1200);
+        const redirects = {
+          medico: "/dashboard.html",
+          paciente: "/monitoreo.html",
+          admin: "/admin.html"
+        };
+        window.location.href = redirects[data.user.rol] || "/dashboard.html";
+      }, 1200);
 
     } else {
       showAlert("login-error", data.detail || "Credenciales incorrectas. Intenta de nuevo.");
@@ -278,19 +271,10 @@ document.getElementById("registroForm").addEventListener("submit", async functio
 /* ══════════════════════════════════════════════
    INIT — verificar si ya hay sesión activa
 ══════════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
-    const token = localStorage.getItem("nd_token") || sessionStorage.getItem("nd_token");
-    const userJson = localStorage.getItem("nd_user") || sessionStorage.getItem("nd_user");
-
-    // SOLO redirigir si el usuario ya está logueado y está viendo la raíz o el index
-    const isLoginPage = window.location.pathname.endsWith("index.html") || window.location.pathname === "/";
-    
-    if (token && userJson && isLoginPage) {
-        const user = JSON.parse(userJson);
-        if (user.rol === 'paciente') {
-            window.location.href = "perfil.html";
-        } else if (user.rol === 'medico') {
-            // window.location.href = "perfil_medico.html";
-        }
-    }
-});
+(function checkSession() {
+  const token = localStorage.getItem("nd_token") || sessionStorage.getItem("nd_token");
+  if (token) {
+    // Opcional: validar token con el servidor antes de redirigir
+    // window.location.href = "/dashboard.html";
+  }
+})();
