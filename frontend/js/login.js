@@ -201,6 +201,18 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         };
         window.location.href = redirects[data.user.rol] || "/dashboard.html";
       }, 1200);
+        // Obtenemos el rol del objeto user que devuelve tu API (main.py)
+        const rol = data.user.rol; 
+
+        if (rol === 'paciente') {
+            window.location.href = "perfil.html"; 
+        } else if (rol === 'medico') {
+            alert("El panel de médico está en desarrollo.");
+            window.location.href = "dashboard_medico.html";
+        } else {
+            window.location.href = "index.html";
+        }
+    }, 1200);
 
     } else {
       showAlert("login-error", data.detail || "Credenciales incorrectas. Intenta de nuevo.");

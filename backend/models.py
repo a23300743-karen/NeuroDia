@@ -109,6 +109,7 @@ class Paciente(Base):
     hba1c             = Column(DECIMAL(4, 1), nullable=True)
     grupo_estudio     = Column(String(50), nullable=True)
     consentimiento    = Column(Boolean, nullable=False, default=False)
+    verificado        = Column(Boolean, nullable=False, default=False)
     created_at        = Column(DateTime, server_default=func.now(), nullable=False)
 
     # Relaciones
