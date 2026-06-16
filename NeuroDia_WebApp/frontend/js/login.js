@@ -4,7 +4,7 @@
  * llamadas al API FastAPI, y feedback de UI.
  */
 
-const API_BASE = "https://choosing-radio-diabolic.ngrok-free.dev";
+const API_BASE = window.location.origin;
 
 /* ══════════════════════════════════════════════
    TABS

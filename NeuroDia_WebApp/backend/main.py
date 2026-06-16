@@ -54,11 +54,20 @@ app.add_middleware(
 # Servir archivos estáticos del frontend
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_path):
-    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    app.mount("/css", StaticFiles(directory=os.path.join(frontend_path, "css")), name="css")
+    app.mount("/js", StaticFiles(directory=os.path.join(frontend_path, "js")), name="js")
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
 
 @app.on_event("startup")
 def on_startup():
     verify_connection()
+
+@app.get("/", include_in_schema=False)
+def serve_root():
+    index_path = os.path.join(frontend_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
 
 # Ruta para servir HTML files
 @app.get("/{path:path}", tags=["Frontend"])
