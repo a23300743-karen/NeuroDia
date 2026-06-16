@@ -2,6 +2,7 @@ const API_BASE = window.location.origin;
 let currentUser = null;
 let pacientesData = [];
 let alertasData = [];
+let pacientesVinculacionData = [];
 
 /* ── AUTH ── */
 function getToken() {
@@ -35,6 +36,7 @@ function showView(name) {
   if (navEl) navEl.classList.add('active');
   if (name === 'pacientes') renderTablaPacientes(pacientesData);
   if (name === 'alertas') renderAlertasView();
+  if (name === 'alta') loadPacientesVinculacion();
 }
 
 /* ── DASHBOARD KPIs ── */
@@ -276,6 +278,110 @@ function renderAlertasView() {
 let pacienteEncontrado = null;
 let altaModo = 'vincular';
 
+async function loadPacientesVinculacion() {
+  const btn = document.getElementById("buscar-btn");
+  if (btn) btn.disabled = true;
+  document.getElementById("buscar-btn-text").style.display = "none";
+  document.getElementById("buscar-btn-loader").style.display = "inline";
+  document.getElementById("alta-error-buscar").style.display = 'none';
+
+  try {
+    const res = await authFetch(`${API_BASE}/medico/pacientes-vinculacion`);
+    if (!res || !res.ok) {
+      const err = res ? await res.json() : {};
+      document.getElementById("alta-error-buscar").textContent = err.detail || "No se pudo cargar la lista de pacientes.";
+      document.getElementById("alta-error-buscar").style.display = 'block';
+      return;
+    }
+    pacientesVinculacionData = await res.json();
+    renderPacientesVinculacion(pacientesVinculacionData);
+  } finally {
+    if (btn) btn.disabled = false;
+    document.getElementById("buscar-btn-text").style.display = "inline";
+    document.getElementById("buscar-btn-loader").style.display = "none";
+  }
+}
+
+function filterPacientesVinculacion(q) {
+  const query = q.trim().toLowerCase();
+  const filtered = pacientesVinculacionData.filter(p =>
+    `${p.nombre} ${p.apellidos} ${p.email}`.toLowerCase().includes(query)
+  );
+  renderPacientesVinculacion(filtered);
+}
+
+function renderPacientesVinculacion(data) {
+  const el = document.getElementById("alta-lista-pacientes");
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:22px;text-align:center">Sin pacientes que coincidan con la busqueda.</div>';
+    return;
+  }
+
+  const estadoLabel = {
+    disponible: { text: 'Disponible', cls: 'badge-ok' },
+    vinculado: { text: 'Ya vinculado', cls: 'badge-warn' },
+    asignado_otro: { text: 'Asignado a otro medico', cls: 'badge-muted' },
+  };
+
+  el.innerHTML = data.map(p => {
+    const initials = `${p.nombre?.[0] || ''}${p.apellidos?.[0] || ''}`.toUpperCase() || '?';
+    const estado = estadoLabel[p.estado_vinculacion] || estadoLabel.disponible;
+    const activo = p.consentimiento
+      ? '<span class="badge badge-ok">Activo</span>'
+      : '<span class="badge badge-muted">Inactivo</span>';
+    const selected = pacienteEncontrado && pacienteEncontrado.paciente_id === p.id ? ' selected' : '';
+    const disabled = p.puede_vincular ? '' : ' disabled';
+    const action = p.puede_vincular ? `onclick="seleccionarPacienteVinculacion(${p.id})"` : '';
+
+    return `<button type="button" class="alta-paciente-row${selected}${disabled}" ${action}>
+      <div class="res-avatar sm">${initials}</div>
+      <div class="alta-paciente-main">
+        <div class="alta-paciente-name">${p.nombre} ${p.apellidos}</div>
+        <div class="alta-paciente-email">${p.email}</div>
+      </div>
+      <div class="alta-paciente-meta">
+        <span class="badge ${estado.cls}">${estado.text}</span>
+        ${activo}
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function seleccionarPacienteVinculacion(pacienteId) {
+  const p = pacientesVinculacionData.find(x => x.id === pacienteId);
+  if (!p || !p.puede_vincular) return;
+
+  altaModo = 'vincular';
+  pacienteEncontrado = {
+    usuario_id: p.usuario_id,
+    paciente_id: p.id,
+    email: p.email,
+    nombre: p.nombre,
+    apellidos: p.apellidos,
+    tipo_diabetes: p.tipo_diabetes,
+    anios_diagnostico: p.anios_diagnostico,
+    hba1c: p.hba1c,
+    grupo_estudio: p.grupo_estudio,
+    consentimiento: p.consentimiento,
+  };
+
+  const iniciales = `${p.nombre?.[0] || ''}${p.apellidos?.[0] || ''}`.toUpperCase();
+  document.getElementById("alta-nuevo").style.display = 'none';
+  document.getElementById("alta-avatar").textContent = iniciales || '?';
+  document.getElementById("alta-nombre-display").textContent = `${p.nombre} ${p.apellidos}`;
+  document.getElementById("alta-email-display").textContent = p.email;
+  document.getElementById("alta-diabetes").value = p.tipo_diabetes || 'tipo_2';
+  document.getElementById("alta-anios").value = p.anios_diagnostico || '';
+  document.getElementById("alta-hba1c").value = p.hba1c || '';
+  document.getElementById("alta-grupo").value = p.grupo_estudio || '';
+  document.getElementById("alta-consentimiento").checked = Boolean(p.consentimiento);
+  document.getElementById("alta-btn-text").textContent = 'Vincular paciente';
+  document.getElementById("alta-paso2").style.display = 'block';
+  renderPacientesVinculacion(pacientesVinculacionData.filter(item =>
+    `${item.nombre} ${item.apellidos} ${item.email}`.toLowerCase().includes(document.getElementById("alta-email").value.trim().toLowerCase())
+  ));
+}
+
 function clearAltaErrors() {
   ['err-alta-email', 'err-alta-nombre', 'err-alta-apellidos', 'err-alta-password'].forEach(id => {
     const el = document.getElementById(id);
@@ -352,7 +458,7 @@ async function buscarPaciente() {
 
 // Buscar también con Enter
 document.getElementById("alta-email").addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); buscarPaciente(); }
+  if (e.key === "Enter") { e.preventDefault(); }
 });
 
 /* ── VINCULAR PACIENTE ── */
@@ -398,6 +504,7 @@ async function vincularPaciente() {
       document.getElementById("alta-success").style.display = 'block';
       await loadPacientes();
       await loadDashboard();
+      await loadPacientesVinculacion();
     } else {
       const err = res ? await res.json() : {};
       document.getElementById("alta-error").textContent = err.detail || (altaModo === 'crear' ? "Error al crear paciente." : "Error al vincular.");

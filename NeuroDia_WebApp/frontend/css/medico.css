@@ -226,3 +226,59 @@
 .two-col {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
 }
+
+.alta-paciente-list {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-height: 340px;
+  overflow-y: auto;
+  background: white;
+}
+
+.alta-paciente-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--p8);
+  background: white;
+  text-align: left;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.alta-paciente-row:last-child { border-bottom: 0; }
+.alta-paciente-row:hover { background: var(--p8); }
+.alta-paciente-row.selected { background: var(--p7); }
+.alta-paciente-row.disabled {
+  cursor: not-allowed;
+  opacity: .68;
+}
+
+.alta-paciente-main {
+  flex: 1;
+  min-width: 0;
+}
+.alta-paciente-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.alta-paciente-email {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alta-paciente-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
