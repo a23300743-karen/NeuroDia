@@ -6,6 +6,9 @@ Ejecutar: uvicorn main:app --reload --port 8000
 from fastapi import FastAPI, HTTPException, Depends, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 from pydantic import BaseModel, EmailStr, field_validator
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -48,9 +51,27 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
+# Servir archivos estáticos del frontend
+frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
 @app.on_event("startup")
 def on_startup():
     verify_connection()
+
+# Ruta para servir HTML files
+@app.get("/{path:path}", tags=["Frontend"])
+def serve_frontend(path: str):
+    """Serve frontend files from the frontend directory"""
+    file_path = os.path.join(frontend_path, path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    # Si no existe el archivo, servir index.html para SPA routing
+    index_path = os.path.join(frontend_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
 
 
 # ══════════════════════════════════════════════
