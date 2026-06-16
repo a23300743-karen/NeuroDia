@@ -79,9 +79,9 @@ def verify_connection():
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        print("✓ Conexión a MySQL exitosa — base de datos: neurodia")
+        print("OK Conexion a MySQL exitosa - base de datos: neurodia")
         return True
     except OperationalError as e:
-        print(f"✗ Error conectando a MySQL: {e}")
+        print(f"ERROR conectando a MySQL: {e}")
         print("  Verifica que MySQL esté corriendo y que el archivo .env sea correcto.")
         return False

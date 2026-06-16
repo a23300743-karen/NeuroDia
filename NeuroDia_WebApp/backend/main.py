@@ -70,7 +70,7 @@ def serve_root():
     raise HTTPException(status_code=404, detail="Not found")
 
 # Ruta para servir HTML files
-@app.get("/{path:path}", tags=["Frontend"])
+@app.get("/frontend/{path:path}", tags=["Frontend"], include_in_schema=False)
 def serve_frontend(path: str):
     """Serve frontend files from the frontend directory"""
     file_path = os.path.join(frontend_path, path)
@@ -621,6 +621,23 @@ class PacienteResumenOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PacienteVinculacionOut(BaseModel):
+    id:                int
+    usuario_id:        int
+    email:             str
+    nombre:            str
+    apellidos:         str
+    tipo_diabetes:     Optional[str] = None
+    hba1c:             Optional[Decimal] = None
+    anios_diagnostico: Optional[int] = None
+    grupo_estudio:     Optional[str] = None
+    consentimiento:    bool = False
+    verificado:        bool = False
+    medico_id:         Optional[int] = None
+    estado_vinculacion:str
+    puede_vincular:    bool
+
+
 class DashboardMedicoOut(BaseModel):
     total_pacientes:     int
     pacientes_activos:   int
@@ -719,6 +736,50 @@ def get_mis_pacientes(
             ultima_glucosa=ultimo.glucosa_valor if ultimo else None,
             ultima_fecha=ultimo.fecha if ultimo else None,
             alertas_activas=alertas_n,
+        ))
+    return result
+
+
+@app.get("/medico/pacientes-vinculacion", response_model=List[PacienteVinculacionOut], tags=["Médico"])
+def get_pacientes_para_vincular(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    medico = get_medico_or_403(current_user)
+    pacientes = (
+        db.query(Paciente)
+        .join(Usuario, Paciente.usuario_id == Usuario.id)
+        .order_by(Paciente.nombre.asc(), Paciente.apellidos.asc())
+        .all()
+    )
+
+    result = []
+    for p in pacientes:
+        if p.medico_id == medico.id:
+            estado = "vinculado"
+            puede_vincular = False
+        elif p.medico_id:
+            estado = "asignado_otro"
+            puede_vincular = False
+        else:
+            estado = "disponible"
+            puede_vincular = True
+
+        result.append(PacienteVinculacionOut(
+            id=p.id,
+            usuario_id=p.usuario_id,
+            email=p.usuario.email if p.usuario else "",
+            nombre=p.nombre,
+            apellidos=p.apellidos,
+            tipo_diabetes=p.tipo_diabetes.value if p.tipo_diabetes else None,
+            hba1c=p.hba1c,
+            anios_diagnostico=p.anios_diagnostico,
+            grupo_estudio=p.grupo_estudio,
+            consentimiento=p.consentimiento,
+            verificado=p.verificado,
+            medico_id=p.medico_id,
+            estado_vinculacion=estado,
+            puede_vincular=puede_vincular,
         ))
     return result
 
@@ -858,7 +919,7 @@ def get_paciente_detalle(
 class VincularPacienteIn(BaseModel):
     email: EmailStr
 
-@app.post("/medico/vincular-paciente", response_model=PacienteResumenOut, tags=["Médico"])
+@app.post("/medico/vincular-paciente-simple", response_model=PacienteResumenOut, tags=["Médico"], include_in_schema=False)
 def vincular_paciente(
     data: VincularPacienteIn,
     db: Session = Depends(get_db),
@@ -892,6 +953,17 @@ def vincular_paciente(
         verificado=paciente.verificado, consentimiento=paciente.consentimiento,
         alertas_activas=alertas_n,
     )
+
+
+@app.get("/{path:path}", tags=["Frontend"], include_in_schema=False)
+def serve_frontend_catchall(path: str):
+    file_path = os.path.join(frontend_path, path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index_path = os.path.join(frontend_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
 
 
 # ── Buscar paciente por correo (para precargar formulario) ─────
