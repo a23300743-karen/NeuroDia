@@ -274,13 +274,39 @@ function renderAlertasView() {
 
 /* ── BUSCAR PACIENTE ── */
 let pacienteEncontrado = null;
+let altaModo = 'vincular';
+
+function clearAltaErrors() {
+  ['err-alta-email', 'err-alta-nombre', 'err-alta-apellidos', 'err-alta-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+}
+
+function showCrearPaciente(email) {
+  altaModo = 'crear';
+  pacienteEncontrado = null;
+  document.getElementById("alta-nuevo").style.display = 'block';
+  document.getElementById("alta-paso2").style.display = 'block';
+  document.getElementById("alta-avatar").textContent = '+';
+  document.getElementById("alta-nombre-display").textContent = 'Paciente nuevo';
+  document.getElementById("alta-email-display").textContent = email;
+  document.getElementById("alta-diabetes").value = 'tipo_2';
+  document.getElementById("alta-anios").value = '';
+  document.getElementById("alta-hba1c").value = '';
+  document.getElementById("alta-grupo").value = '';
+  document.getElementById("alta-consentimiento").checked = false;
+  document.getElementById("alta-btn-text").textContent = 'Crear paciente';
+}
 
 async function buscarPaciente() {
   const email = document.getElementById("alta-email").value.trim();
-  document.getElementById("err-alta-email").textContent = '';
+  clearAltaErrors();
   document.getElementById("alta-error-buscar").style.display = 'none';
+  document.getElementById("alta-nuevo").style.display = 'none';
   document.getElementById("alta-paso2").style.display = 'none';
   pacienteEncontrado = null;
+  altaModo = 'vincular';
 
   if (!email) {
     document.getElementById("err-alta-email").textContent = "Ingresa el correo del paciente.";
@@ -306,11 +332,16 @@ async function buscarPaciente() {
       if (pacienteEncontrado.hba1c) document.getElementById("alta-hba1c").value = pacienteEncontrado.hba1c;
       if (pacienteEncontrado.grupo_estudio) document.getElementById("alta-grupo").value = pacienteEncontrado.grupo_estudio;
       document.getElementById("alta-consentimiento").checked = pacienteEncontrado.consentimiento;
+      document.getElementById("alta-btn-text").textContent = 'Vincular paciente';
       document.getElementById("alta-paso2").style.display = 'block';
     } else {
       const err = res ? await res.json() : {};
-      document.getElementById("alta-error-buscar").textContent = err.detail || "No se pudo buscar al paciente.";
-      document.getElementById("alta-error-buscar").style.display = 'block';
+      if (res && res.status === 404) {
+        showCrearPaciente(email);
+      } else {
+        document.getElementById("alta-error-buscar").textContent = err.detail || "No se pudo buscar al paciente.";
+        document.getElementById("alta-error-buscar").style.display = 'block';
+      }
     }
   } finally {
     btn.disabled = false;
@@ -326,11 +357,12 @@ document.getElementById("alta-email").addEventListener("keydown", e => {
 
 /* ── VINCULAR PACIENTE ── */
 async function vincularPaciente() {
-  if (!pacienteEncontrado) return;
+  if (!pacienteEncontrado && altaModo !== 'crear') return;
   document.getElementById("alta-error").style.display = 'none';
+  clearAltaErrors();
 
   const payload = {
-    email:             pacienteEncontrado.email,
+    email:             altaModo === 'crear' ? document.getElementById("alta-email").value.trim() : pacienteEncontrado.email,
     tipo_diabetes:     document.getElementById("alta-diabetes").value,
     anios_diagnostico: parseInt(document.getElementById("alta-anios").value) || null,
     hba1c:             parseFloat(document.getElementById("alta-hba1c").value) || null,
@@ -338,13 +370,26 @@ async function vincularPaciente() {
     consentimiento:    document.getElementById("alta-consentimiento").checked,
   };
 
+  if (altaModo === 'crear') {
+    payload.nombre = document.getElementById("alta-nombre").value.trim();
+    payload.apellidos = document.getElementById("alta-apellidos").value.trim();
+    payload.password = document.getElementById("alta-password").value;
+
+    let valid = true;
+    if (!payload.nombre) { document.getElementById("err-alta-nombre").textContent = "Ingresa el nombre."; valid = false; }
+    if (!payload.apellidos) { document.getElementById("err-alta-apellidos").textContent = "Ingresa los apellidos."; valid = false; }
+    if (!payload.password || payload.password.length < 8) { document.getElementById("err-alta-password").textContent = "Mínimo 8 caracteres."; valid = false; }
+    if (!valid) return;
+  }
+
   const btn = document.getElementById("alta-btn");
   btn.disabled = true;
   document.getElementById("alta-btn-text").style.display = "none";
   document.getElementById("alta-btn-loader").style.display = "inline";
 
   try {
-    const res = await authFetch(`${API_BASE}/medico/vincular-paciente`, { method: 'POST', body: JSON.stringify(payload) });
+    const endpoint = altaModo === 'crear' ? '/medico/alta-paciente' : '/medico/vincular-paciente';
+    const res = await authFetch(`${API_BASE}${endpoint}`, { method: 'POST', body: JSON.stringify(payload) });
     if (res && res.ok) {
       const paciente = await res.json();
       document.getElementById("alta-success-nombre").textContent = `${paciente.nombre} ${paciente.apellidos}`;
@@ -355,7 +400,7 @@ async function vincularPaciente() {
       await loadDashboard();
     } else {
       const err = res ? await res.json() : {};
-      document.getElementById("alta-error").textContent = err.detail || "Error al vincular.";
+      document.getElementById("alta-error").textContent = err.detail || (altaModo === 'crear' ? "Error al crear paciente." : "Error al vincular.");
       document.getElementById("alta-error").style.display = 'block';
     }
   } finally {
@@ -367,12 +412,19 @@ async function vincularPaciente() {
 
 function resetAltaForm() {
   document.getElementById("alta-email").value = '';
+  document.getElementById("alta-nombre").value = '';
+  document.getElementById("alta-apellidos").value = '';
+  document.getElementById("alta-password").value = '';
+  document.getElementById("alta-nuevo").style.display = 'none';
   document.getElementById("alta-paso1").style.display = 'block';
   document.getElementById("alta-paso2").style.display = 'none';
   document.getElementById("alta-success").style.display = 'none';
   document.getElementById("alta-error-buscar").style.display = 'none';
   document.getElementById("alta-error").style.display = 'none';
+  document.getElementById("alta-btn-text").textContent = 'Vincular paciente';
   pacienteEncontrado = null;
+  altaModo = 'vincular';
+  clearAltaErrors();
 }
 
 /* ── INIT ── */

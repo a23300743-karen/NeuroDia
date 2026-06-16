@@ -255,6 +255,28 @@
             </button>
           </div>
           <div id="alta-error-buscar" class="page-alert" style="display:none;margin-top:12px"></div>
+
+          <div id="alta-nuevo" style="display:none;margin-top:18px">
+            <div style="height:1px;background:var(--border);margin:18px 0"></div>
+            <h4 class="form-section-title">Crear paciente nuevo</h4>
+            <div class="two-col" style="margin-bottom:0">
+              <div class="field-group">
+                <label>Nombre</label>
+                <input type="text" id="alta-nombre" placeholder="Nombre">
+                <span class="field-error" id="err-alta-nombre"></span>
+              </div>
+              <div class="field-group">
+                <label>Apellidos</label>
+                <input type="text" id="alta-apellidos" placeholder="Apellidos">
+                <span class="field-error" id="err-alta-apellidos"></span>
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Contraseña temporal</label>
+              <input type="password" id="alta-password" placeholder="Mínimo 8 caracteres">
+              <span class="field-error" id="err-alta-password"></span>
+            </div>
+          </div>
         </div>
 
         <!-- PASO 2: DATOS (oculto hasta buscar) -->

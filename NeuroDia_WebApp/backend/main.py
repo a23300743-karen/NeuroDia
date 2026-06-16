@@ -858,7 +858,7 @@ def get_paciente_detalle(
 class VincularPacienteIn(BaseModel):
     email: EmailStr
 
-@app.post("/medico/vincular-paciente", response_model=PacienteResumenOut, tags=["Médico"])
+@app.post("/medico/vincular-paciente-simple", response_model=PacienteResumenOut, tags=["Médico"], include_in_schema=False)
 def vincular_paciente(
     data: VincularPacienteIn,
     db: Session = Depends(get_db),
