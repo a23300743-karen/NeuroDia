@@ -70,7 +70,7 @@ def serve_root():
     raise HTTPException(status_code=404, detail="Not found")
 
 # Ruta para servir HTML files
-@app.get("/{path:path}", tags=["Frontend"])
+@app.get("/frontend/{path:path}", tags=["Frontend"], include_in_schema=False)
 def serve_frontend(path: str):
     """Serve frontend files from the frontend directory"""
     file_path = os.path.join(frontend_path, path)
@@ -953,6 +953,17 @@ def vincular_paciente(
         verificado=paciente.verificado, consentimiento=paciente.consentimiento,
         alertas_activas=alertas_n,
     )
+
+
+@app.get("/{path:path}", tags=["Frontend"], include_in_schema=False)
+def serve_frontend_catchall(path: str):
+    file_path = os.path.join(frontend_path, path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index_path = os.path.join(frontend_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Not found")
 
 
 # ── Buscar paciente por correo (para precargar formulario) ─────
