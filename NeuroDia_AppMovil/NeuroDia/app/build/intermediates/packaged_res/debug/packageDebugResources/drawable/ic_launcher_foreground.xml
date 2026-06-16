@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Círculo blanco de fondo -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20 A34,34 0 1,1 53.99,20 Z" />
+
+    <!-- Letra N centrada -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M38,35 L38,73 L44,73 L44,48 L64,73 L70,73 L70,35 L64,35 L64,60 L44,35 Z" />
+
+    <!-- Punto decorativo (pulso cardíaco) -->
+    <path
+        android:fillColor="#42A5F5"
+        android:strokeColor="#42A5F5"
+        android:strokeWidth="2"
+        android:pathData="M20,80 L28,80 L32,72 L36,88 L40,76 L44,80 L88,80" />
+
+</vector>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical">
+    <TextView android:id="@+id/tvDia" android:layout_width="80dp" android:layout_height="wrap_content"
+        android:textStyle="bold"/>
+    <EditText android:id="@+id/etHoraInicio" android:layout_width="70dp" android:layout_height="wrap_content"
+        android:hint="08:00" android:inputType="time" android:textSize="13sp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text=" - " android:layout_marginHorizontal="4dp"/>
+    <EditText android:id="@+id/etHoraFin" android:layout_width="70dp" android:layout_height="wrap_content"
+        android:hint="17:00" android:inputType="time" android:textSize="13sp"/>
+    <Switch android:id="@+id/swActivo" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"/>
+</LinearLayout>

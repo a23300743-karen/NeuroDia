@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Tipos de diabetes — valores mostrados en Spinner -->
+    <string-array name="tipos_diabetes">
+        <item>Tipo 1</item>
+        <item>Tipo 2</item>
+        <item>Gestacional</item>
+        <item>Otro</item>
+    </string-array>
+
+    <!-- Valores que se envían a la API (mismo índice) -->
+    <string-array name="tipos_diabetes_values">
+        <item>tipo_1</item>
+        <item>tipo_2</item>
+        <item>gestacional</item>
+        <item>otro</item>
+    </string-array>
+
+    <!-- Sexo -->
+    <string-array name="sexos">
+        <item>Masculino</item>
+        <item>Femenino</item>
+        <item>Otro</item>
+    </string-array>
+
+    <string-array name="sexos_values">
+        <item>masculino</item>
+        <item>femenino</item>
+        <item>otro</item>
+    </string-array>
+
+    <!-- Momento de glucosa -->
+    <string-array name="momentos_glucosa">
+        <item>En ayunas</item>
+        <item>Postprandial</item>
+        <item>Nocturno</item>
+    </string-array>
+
+    <string-array name="momentos_glucosa_values">
+        <item>ayunas</item>
+        <item>postprandial</item>
+        <item>nocturno</item>
+    </string-array>
+
+    <!-- Roles para registro -->
+    <string-array name="roles">
+        <item>Paciente</item>
+        <item>Médico</item>
+    </string-array>
+
+    <string-array name="roles_values">
+        <item>paciente</item>
+        <item>medico</item>
+    </string-array>
+
+    <!-- Localizaciones de dolor (checkboxes en MonitoreoActivity) -->
+    <string-array name="dolor_localizaciones">
+        <item>Pie derecho</item>
+        <item>Pie izquierdo</item>
+        <item>Pierna derecha</item>
+        <item>Pierna izquierda</item>
+        <item>Mano derecha</item>
+        <item>Mano izquierda</item>
+        <item>Brazo derecho</item>
+        <item>Brazo izquierdo</item>
+        <item>Espalda</item>
+        <item>Otro</item>
+    </string-array>
+
+    <!-- Síntomas comunes (checkboxes en MonitoreoActivity) -->
+    <string-array name="sintomas_lista">
+        <item>Hormigueo</item>
+        <item>Ardor</item>
+        <item>Entumecimiento</item>
+        <item>Calambres</item>
+        <item>Debilidad muscular</item>
+        <item>Sensibilidad al tacto</item>
+        <item>Mareo</item>
+        <item>Sudoración excesiva</item>
+        <item>Palpitaciones</item>
+    </string-array>
+
+    <!-- Días de la semana para HorarioActivity -->
+    <string-array name="dias_semana">
+        <item>Lunes</item>
+        <item>Martes</item>
+        <item>Miércoles</item>
+        <item>Jueves</item>
+        <item>Viernes</item>
+        <item>Sábado</item>
+        <item>Domingo</item>
+    </string-array>
+
+    <string-array name="dias_semana_values">
+        <item>lunes</item>
+        <item>martes</item>
+        <item>miercoles</item>
+        <item>jueves</item>
+        <item>viernes</item>
+        <item>sabado</item>
+        <item>domingo</item>
+    </string-array>
+
+</resources>

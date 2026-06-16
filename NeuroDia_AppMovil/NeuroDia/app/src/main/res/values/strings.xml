@@ -1,0 +1,110 @@
+<resources>
+    <string name="app_name">NeuroDia</string>
+
+    <!-- Login -->
+    <string name="hint_email">Correo electrónico</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="hint_nombre">Nombre</string>
+    <string name="hint_apellidos">Apellidos</string>
+    <string name="btn_login">Iniciar sesión</string>
+    <string name="btn_register">Registrarse</string>
+    <string name="lbl_no_account">¿No tienes cuenta?</string>
+    <string name="lbl_have_account">¿Ya tienes cuenta?</string>
+    <string name="lbl_rol">Rol</string>
+
+    <!-- Paciente Home -->
+    <string name="card_monitoreo">Monitoreo Diario</string>
+    <string name="card_historial">Historial</string>
+    <string name="card_perfil">Mi Perfil</string>
+    <string name="card_alertas">Alertas</string>
+    <string name="card_medicamentos">Medicamentos</string>
+    <string name="card_chat">Chat con Médico</string>
+
+    <!-- Monitoreo -->
+    <string name="title_monitoreo">Registro Diario</string>
+    <string name="hint_glucosa">Glucosa (mg/dL)</string>
+    <string name="hint_dolor">Intensidad del dolor (0–10)</string>
+    <string name="hint_notas">Notas adicionales</string>
+    <string name="lbl_momento_glucosa">Momento de medición</string>
+    <string name="lbl_localizaciones">Localización del dolor</string>
+    <string name="lbl_sintomas">Síntomas</string>
+    <string name="btn_guardar">Guardar</string>
+
+    <!-- Historial -->
+    <string name="title_historial">Historial de Registros</string>
+    <string name="title_grafica">Glucosa (mg/dL)</string>
+    <string name="empty_historial">Sin registros aún</string>
+
+    <!-- Perfil -->
+    <string name="title_perfil">Mi Perfil</string>
+    <string name="hint_fecha_nac">Fecha de nacimiento (AAAA-MM-DD)</string>
+    <string name="hint_curp">CURP</string>
+    <string name="hint_telefono">Teléfono</string>
+    <string name="hint_anios_diag">Años desde diagnóstico</string>
+    <string name="hint_hba1c">HbA1c (%)</string>
+    <string name="lbl_tipo_diabetes">Tipo de diabetes</string>
+    <string name="lbl_sexo">Sexo</string>
+    <string name="btn_actualizar">Actualizar</string>
+
+    <!-- Alertas -->
+    <string name="title_alertas">Alertas</string>
+    <string name="lbl_resuelta">Resuelta</string>
+    <string name="lbl_pendiente">Pendiente</string>
+    <string name="btn_resolver">Resolver</string>
+    <string name="empty_alertas">Sin alertas</string>
+
+    <!-- Medicamentos -->
+    <string name="title_medicamentos">Medicamentos y Comorbilidades</string>
+    <string name="tab_medicamentos">Medicamentos</string>
+    <string name="tab_comorbilidades">Comorbilidades</string>
+    <string name="btn_add_med">Agregar medicamento</string>
+    <string name="btn_add_comorb">Agregar comorbilidad</string>
+    <string name="hint_med_nombre">Nombre del medicamento</string>
+    <string name="hint_med_dosis">Dosis</string>
+    <string name="hint_med_frec">Frecuencia</string>
+    <string name="hint_comorb_nombre">Nombre de la comorbilidad</string>
+
+    <!-- Chat -->
+    <string name="title_chat">Chat</string>
+    <string name="hint_mensaje">Escribe un mensaje…</string>
+    <string name="btn_enviar">Enviar</string>
+    <string name="lbl_disponible">Disponible</string>
+    <string name="lbl_no_disponible">No disponible</string>
+
+    <!-- Dashboard Médico -->
+    <string name="title_dashboard">Dashboard Médico</string>
+    <string name="lbl_total_pacientes">Total pacientes</string>
+    <string name="lbl_activos">Activos</string>
+    <string name="lbl_alertas_act">Alertas activas</string>
+    <string name="lbl_sin_registro">Sin registro 7 días</string>
+
+    <!-- Pacientes -->
+    <string name="title_pacientes">Mis Pacientes</string>
+    <string name="btn_alta">Alta nuevo</string>
+    <string name="btn_vincular">Vincular existente</string>
+    <string name="hint_buscar_email">Buscar por email</string>
+    <string name="btn_buscar">Buscar</string>
+
+    <!-- Detalle paciente -->
+    <string name="title_detalle">Detalle del Paciente</string>
+    <string name="btn_verificar">Verificar</string>
+    <string name="btn_chat">Chat</string>
+
+    <!-- Alta paciente -->
+    <string name="title_alta">Alta de Paciente</string>
+    <string name="tab_alta_nuevo">Nuevo</string>
+    <string name="tab_vincular">Vincular</string>
+
+    <!-- Horario -->
+    <string name="title_horario">Mi Horario</string>
+    <string name="btn_guardar_horario">Guardar horario</string>
+
+    <!-- Comunes -->
+    <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <string name="confirm_logout">¿Cerrar sesión?</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_aceptar">Aceptar</string>
+    <string name="error_campos">Completa los campos requeridos</string>
+    <string name="error_red">Error de red. Intenta de nuevo.</string>
+    <string name="lbl_cargando">Cargando…</string>
+</resources>

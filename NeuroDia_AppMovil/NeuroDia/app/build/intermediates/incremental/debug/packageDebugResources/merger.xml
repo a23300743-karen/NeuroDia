@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res"><file name="bubble_recv" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\bubble_recv.xml" qualifiers="" type="drawable"/><file name="bubble_sent" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\bubble_sent.xml" qualifiers="" type="drawable"/><file name="circle_badge" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\circle_badge.xml" qualifiers="" type="drawable"/><file name="circle_bg" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\circle_bg.xml" qualifiers="" type="drawable"/><file name="ic_launcher_background" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\ic_launcher_background.xml" qualifiers="" type="drawable"/><file name="ic_launcher_foreground" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\drawable\ic_launcher_foreground.xml" qualifiers="" type="drawable"/><file name="activity_alertas_medico" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_alertas_medico.xml" qualifiers="" type="layout"/><file name="activity_alertas_paciente" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_alertas_paciente.xml" qualifiers="" type="layout"/><file name="activity_alta_paciente" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_alta_paciente.xml" qualifiers="" type="layout"/><file name="activity_chat" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_chat.xml" qualifiers="" type="layout"/><file name="activity_chat_medico" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_chat_medico.xml" qualifiers="" type="layout"/><file name="activity_dashboard_medico" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_dashboard_medico.xml" qualifiers="" type="layout"/><file name="activity_historial" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_historial.xml" qualifiers="" type="layout"/><file name="activity_horario" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_horario.xml" qualifiers="" type="layout"/><file name="activity_login" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_login.xml" qualifiers="" type="layout"/><file name="activity_medicamentos" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_medicamentos.xml" qualifiers="" type="layout"/><file name="activity_monitoreo" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_monitoreo.xml" qualifiers="" type="layout"/><file name="activity_pacientes" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_pacientes.xml" qualifiers="" type="layout"/><file name="activity_paciente_detalle" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_paciente_detalle.xml" qualifiers="" type="layout"/><file name="activity_paciente_home" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_paciente_home.xml" qualifiers="" type="layout"/><file name="activity_perfil" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\activity_perfil.xml" qualifiers="" type="layout"/><file name="dialog_add_med" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\dialog_add_med.xml" qualifiers="" type="layout"/><file name="item_alerta" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_alerta.xml" qualifiers="" type="layout"/><file name="item_alerta_medico" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_alerta_medico.xml" qualifiers="" type="layout"/><file name="item_comorbilidad" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_comorbilidad.xml" qualifiers="" type="layout"/><file name="item_conversacion" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_conversacion.xml" qualifiers="" type="layout"/><file name="item_horario" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_horario.xml" qualifiers="" type="layout"/><file name="item_medicamento" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_medicamento.xml" qualifiers="" type="layout"/><file name="item_msg_recv" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_msg_recv.xml" qualifiers="" type="layout"/><file name="item_msg_sent" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_msg_sent.xml" qualifiers="" type="layout"/><file name="item_paciente" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_paciente.xml" qualifiers="" type="layout"/><file name="item_registro" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\layout\item_registro.xml" qualifiers="" type="layout"/><file name="ic_launcher" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml" qualifiers="anydpi-v26" type="mipmap"/><file name="ic_launcher_round" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml" qualifiers="anydpi-v26" type="mipmap"/><file path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\values\arrays.xml" qualifiers=""><string-array name="tipos_diabetes">
+        <item>Tipo 1</item>
+        <item>Tipo 2</item>
+        <item>Gestacional</item>
+        <item>Otro</item>
+    </string-array><string-array name="tipos_diabetes_values">
+        <item>tipo_1</item>
+        <item>tipo_2</item>
+        <item>gestacional</item>
+        <item>otro</item>
+    </string-array><string-array name="sexos">
+        <item>Masculino</item>
+        <item>Femenino</item>
+        <item>Otro</item>
+    </string-array><string-array name="sexos_values">
+        <item>masculino</item>
+        <item>femenino</item>
+        <item>otro</item>
+    </string-array><string-array name="momentos_glucosa">
+        <item>En ayunas</item>
+        <item>Postprandial</item>
+        <item>Nocturno</item>
+    </string-array><string-array name="momentos_glucosa_values">
+        <item>ayunas</item>
+        <item>postprandial</item>
+        <item>nocturno</item>
+    </string-array><string-array name="roles">
+        <item>Paciente</item>
+        <item>Médico</item>
+    </string-array><string-array name="roles_values">
+        <item>paciente</item>
+        <item>medico</item>
+    </string-array><string-array name="dolor_localizaciones">
+        <item>Pie derecho</item>
+        <item>Pie izquierdo</item>
+        <item>Pierna derecha</item>
+        <item>Pierna izquierda</item>
+        <item>Mano derecha</item>
+        <item>Mano izquierda</item>
+        <item>Brazo derecho</item>
+        <item>Brazo izquierdo</item>
+        <item>Espalda</item>
+        <item>Otro</item>
+    </string-array><string-array name="sintomas_lista">
+        <item>Hormigueo</item>
+        <item>Ardor</item>
+        <item>Entumecimiento</item>
+        <item>Calambres</item>
+        <item>Debilidad muscular</item>
+        <item>Sensibilidad al tacto</item>
+        <item>Mareo</item>
+        <item>Sudoración excesiva</item>
+        <item>Palpitaciones</item>
+    </string-array><string-array name="dias_semana">
+        <item>Lunes</item>
+        <item>Martes</item>
+        <item>Miércoles</item>
+        <item>Jueves</item>
+        <item>Viernes</item>
+        <item>Sábado</item>
+        <item>Domingo</item>
+    </string-array><string-array name="dias_semana_values">
+        <item>lunes</item>
+        <item>martes</item>
+        <item>miercoles</item>
+        <item>jueves</item>
+        <item>viernes</item>
+        <item>sabado</item>
+        <item>domingo</item>
+    </string-array></file><file path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\values\colors.xml" qualifiers=""><color name="colorPrimary">#1565C0</color><color name="colorPrimaryDark">#0D47A1</color><color name="colorPrimaryVariant">#1976D2</color><color name="colorAccent">#42A5F5</color><color name="primary">@color/colorPrimary</color><color name="colorSecondary">#00ACC1</color><color name="colorSecondaryVariant">#00838F</color><color name="colorOnSecondary">#FFFFFF</color><color name="colorBackground">#F5F7FA</color><color name="background">@color/colorBackground</color><color name="colorSurface">#FFFFFF</color><color name="colorOnSurface">#1A1A2E</color><color name="colorOnBackground">#1A1A2E</color><color name="textPrimary">#1A1A2E</color><color name="textSecondary">#5E6E8A</color><color name="text_primary">@color/textPrimary</color><color name="text_secondary">@color/textSecondary</color><color name="textHint">#9EA8B8</color><color name="colorOnPrimary">#FFFFFF</color><color name="colorError">#D32F2F</color><color name="colorSuccess">#388E3C</color><color name="colorWarning">#F57C00</color><color name="colorInfo">#0288D1</color><color name="white">#FFFFFF</color><color name="red_500">#F44336</color><color name="orange_500">#FF9800</color><color name="teal_700">#00796B</color><color name="bubbleSent">#1565C0</color><color name="bubbleRecv">#E8EDF5</color><color name="bubbleSentText">#FFFFFF</color><color name="bubbleRecvText">#1A1A2E</color><color name="alertaGlucosaAlta">#D32F2F</color><color name="alertaGlucosaBaja">#F57C00</color><color name="alertaDolor">#7B1FA2</color><color name="alertaAdherencia">#1565C0</color><color name="alertaOtro">#455A64</color><color name="kpiTotal">#1565C0</color><color name="kpiActivos">#388E3C</color><color name="kpiAlertas">#D32F2F</color><color name="kpiSinRegistro">#F57C00</color><color name="dividerColor">#E0E4EC</color><color name="cardStroke">#E0E4EC</color><color name="badgeBackground">#D32F2F</color><color name="badgeText">#FFFFFF</color></file><file path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\values\strings.xml" qualifiers=""><string name="app_name">NeuroDia</string><string name="hint_email">Correo electrónico</string><string name="hint_password">Contraseña</string><string name="hint_nombre">Nombre</string><string name="hint_apellidos">Apellidos</string><string name="btn_login">Iniciar sesión</string><string name="btn_register">Registrarse</string><string name="lbl_no_account">¿No tienes cuenta?</string><string name="lbl_have_account">¿Ya tienes cuenta?</string><string name="lbl_rol">Rol</string><string name="card_monitoreo">Monitoreo Diario</string><string name="card_historial">Historial</string><string name="card_perfil">Mi Perfil</string><string name="card_alertas">Alertas</string><string name="card_medicamentos">Medicamentos</string><string name="card_chat">Chat con Médico</string><string name="title_monitoreo">Registro Diario</string><string name="hint_glucosa">Glucosa (mg/dL)</string><string name="hint_dolor">Intensidad del dolor (0–10)</string><string name="hint_notas">Notas adicionales</string><string name="lbl_momento_glucosa">Momento de medición</string><string name="lbl_localizaciones">Localización del dolor</string><string name="lbl_sintomas">Síntomas</string><string name="btn_guardar">Guardar</string><string name="title_historial">Historial de Registros</string><string name="title_grafica">Glucosa (mg/dL)</string><string name="empty_historial">Sin registros aún</string><string name="title_perfil">Mi Perfil</string><string name="hint_fecha_nac">Fecha de nacimiento (AAAA-MM-DD)</string><string name="hint_curp">CURP</string><string name="hint_telefono">Teléfono</string><string name="hint_anios_diag">Años desde diagnóstico</string><string name="hint_hba1c">HbA1c (%)</string><string name="lbl_tipo_diabetes">Tipo de diabetes</string><string name="lbl_sexo">Sexo</string><string name="btn_actualizar">Actualizar</string><string name="title_alertas">Alertas</string><string name="lbl_resuelta">Resuelta</string><string name="lbl_pendiente">Pendiente</string><string name="btn_resolver">Resolver</string><string name="empty_alertas">Sin alertas</string><string name="title_medicamentos">Medicamentos y Comorbilidades</string><string name="tab_medicamentos">Medicamentos</string><string name="tab_comorbilidades">Comorbilidades</string><string name="btn_add_med">Agregar medicamento</string><string name="btn_add_comorb">Agregar comorbilidad</string><string name="hint_med_nombre">Nombre del medicamento</string><string name="hint_med_dosis">Dosis</string><string name="hint_med_frec">Frecuencia</string><string name="hint_comorb_nombre">Nombre de la comorbilidad</string><string name="title_chat">Chat</string><string name="hint_mensaje">Escribe un mensaje…</string><string name="btn_enviar">Enviar</string><string name="lbl_disponible">Disponible</string><string name="lbl_no_disponible">No disponible</string><string name="title_dashboard">Dashboard Médico</string><string name="lbl_total_pacientes">Total pacientes</string><string name="lbl_activos">Activos</string><string name="lbl_alertas_act">Alertas activas</string><string name="lbl_sin_registro">Sin registro 7 días</string><string name="title_pacientes">Mis Pacientes</string><string name="btn_alta">Alta nuevo</string><string name="btn_vincular">Vincular existente</string><string name="hint_buscar_email">Buscar por email</string><string name="btn_buscar">Buscar</string><string name="title_detalle">Detalle del Paciente</string><string name="btn_verificar">Verificar</string><string name="btn_chat">Chat</string><string name="title_alta">Alta de Paciente</string><string name="tab_alta_nuevo">Nuevo</string><string name="tab_vincular">Vincular</string><string name="title_horario">Mi Horario</string><string name="btn_guardar_horario">Guardar horario</string><string name="btn_cerrar_sesion">Cerrar sesión</string><string name="confirm_logout">¿Cerrar sesión?</string><string name="btn_cancelar">Cancelar</string><string name="btn_aceptar">Aceptar</string><string name="error_campos">Completa los campos requeridos</string><string name="error_red">Error de red. Intenta de nuevo.</string><string name="lbl_cargando">Cargando…</string></file><file path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\values\themes.xml" qualifiers=""><style name="Theme.NeuroDia" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorError">@color/colorError</item>
+        <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="android:textColorSecondary">@color/textSecondary</item>
+        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+    </style><style name="Theme.NeuroDia.Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="titleTextColor">@color/colorOnPrimary</item>
+    </style><style name="Widget.NeuroDia.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="cornerRadius">8dp</item>
+    </style><style name="Widget.NeuroDia.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="cornerRadius">8dp</item>
+    </style><style name="Widget.NeuroDia.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/colorPrimary</item>
+        <item name="hintTextColor">@color/colorPrimary</item>
+    </style><style name="Widget.NeuroDia.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="strokeColor">@color/cardStroke</item>
+        <item name="strokeWidth">1dp</item>
+    </style><style name="Theme.NeuroDia.Login" parent="Theme.NeuroDia">
+        <item name="android:windowFullscreen">false</item>
+    </style><style name="Theme.NeuroDia.Dialog" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style></file><file name="network_security_config" path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\main\res\xml\network_security_config.xml" qualifiers="" type="xml"/></source></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\src\debug\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\build\generated\res\resValues\debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\TUF\Downloads\NeuroDia_App\NeuroDia\app\build\generated\res\resValues\debug"/></dataSet><mergedItems/></merger>

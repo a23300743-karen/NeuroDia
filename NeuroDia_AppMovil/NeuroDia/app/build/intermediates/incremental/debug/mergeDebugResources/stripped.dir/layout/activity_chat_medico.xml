@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <!-- Lista conversaciones -->
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:orientation="vertical"
+        android:background="@color/background">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Conversaciones" android:textStyle="bold" android:padding="12dp"
+            android:background="@color/primary" android:textColor="@color/white"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvConversaciones"
+            android:layout_width="match_parent" android:layout_height="match_parent"/>
+    </LinearLayout>
+
+    <!-- Panel de chat -->
+    <LinearLayout android:id="@+id/layoutChat"
+        android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="2" android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:padding="12dp" android:background="@color/primary">
+            <TextView android:id="@+id/tvPacienteChat" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textStyle="bold"
+                android:textColor="@color/white" android:textSize="16sp"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMensajes" android:layout_width="match_parent"
+            android:layout_height="0dp" android:layout_weight="1"
+            android:padding="8dp" android:clipToPadding="false"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="8dp" android:gravity="center_vertical"
+            android:background="@color/white">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMensaje" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:hint="Mensaje…" android:layout_marginEnd="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEnviar" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="Enviar"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

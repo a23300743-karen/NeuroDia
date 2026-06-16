@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primarios -->
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+    <color name="colorPrimaryVariant">#1976D2</color>
+    <color name="colorAccent">#42A5F5</color>
+    <color name="primary">@color/colorPrimary</color>
+
+    <!-- Secundarios -->
+    <color name="colorSecondary">#00ACC1</color>
+    <color name="colorSecondaryVariant">#00838F</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+
+    <!-- Superficies -->
+    <color name="colorBackground">#F5F7FA</color>
+    <color name="background">@color/colorBackground</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#1A1A2E</color>
+    <color name="colorOnBackground">#1A1A2E</color>
+
+    <!-- Texto -->
+    <color name="textPrimary">#1A1A2E</color>
+    <color name="textSecondary">#5E6E8A</color>
+    <color name="text_primary">@color/textPrimary</color>
+    <color name="text_secondary">@color/textSecondary</color>
+    <color name="textHint">#9EA8B8</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <!-- Estado -->
+    <color name="colorError">#D32F2F</color>
+    <color name="colorSuccess">#388E3C</color>
+    <color name="colorWarning">#F57C00</color>
+    <color name="colorInfo">#0288D1</color>
+
+    <!-- Material Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="red_500">#F44336</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="teal_700">#00796B</color>
+
+    <!-- Chat burbujas -->
+    <color name="bubbleSent">#1565C0</color>
+    <color name="bubbleRecv">#E8EDF5</color>
+    <color name="bubbleSentText">#FFFFFF</color>
+    <color name="bubbleRecvText">#1A1A2E</color>
+
+    <!-- Alertas tipos -->
+    <color name="alertaGlucosaAlta">#D32F2F</color>
+    <color name="alertaGlucosaBaja">#F57C00</color>
+    <color name="alertaDolor">#7B1FA2</color>
+    <color name="alertaAdherencia">#1565C0</color>
+    <color name="alertaOtro">#455A64</color>
+
+    <!-- Dashboard KPIs -->
+    <color name="kpiTotal">#1565C0</color>
+    <color name="kpiActivos">#388E3C</color>
+    <color name="kpiAlertas">#D32F2F</color>
+    <color name="kpiSinRegistro">#F57C00</color>
+
+    <!-- Separador / bordes -->
+    <color name="dividerColor">#E0E4EC</color>
+    <color name="cardStroke">#E0E4EC</color>
+
+    <!-- Badge -->
+    <color name="badgeBackground">#D32F2F</color>
+    <color name="badgeText">#FFFFFF</color>
+</resources>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
+
+        <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp"/>
+
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+                <TextView android:id="@+id/tvNombreCompleto" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textStyle="bold" android:textSize="20sp"
+                    android:layout_marginBottom="8dp"/>
+                <TextView android:id="@+id/tvDiabetes" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvHba1c" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvAnios" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvGrupo" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvVerificado" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textColor="@color/teal_700" android:layout_marginTop="4dp"/>
+                <TextView android:id="@+id/tvConsentimiento" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginTop="2dp"/>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnVerificar"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Verificar paciente" android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Comorbilidades y medicamentos" android:textStyle="bold" android:layout_marginBottom="4dp"/>
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="12dp">
+                <TextView android:id="@+id/tvComorbilidades" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvMedicamentos" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Alertas recientes" android:textStyle="bold" android:layout_marginBottom="4dp"/>
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+            <TextView android:id="@+id/tvAlertas" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="12dp"/>
+        </androidx.cardview.widget.CardView>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Glucosa (últimos 30 registros)" android:textStyle="bold" android:layout_marginBottom="4dp"/>
+        <com.github.mikephil.charting.charts.LineChart android:id="@+id/lineChart"
+            android:layout_width="match_parent" android:layout_height="200dp" android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnChat"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="💬 Abrir chat con este paciente" android:layout_marginBottom="32dp"/>
+    </LinearLayout>
+</ScrollView>

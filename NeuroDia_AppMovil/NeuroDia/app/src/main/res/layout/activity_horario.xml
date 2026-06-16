@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/background">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Activa los días y establece tu horario de atención"
+        android:padding="16dp" android:textColor="@color/text_secondary"/>
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvHorario"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:padding="8dp" android:clipToPadding="false"/>
+    <com.google.android.material.button.MaterialButton android:id="@+id/btnGuardar"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Guardar horario" android:layout_margin="16dp"/>
+</LinearLayout>

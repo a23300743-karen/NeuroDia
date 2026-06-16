@@ -1,0 +1,106 @@
+[
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_registro.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_registro.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_perfil.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_perfil.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_alertas_paciente.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_alertas_paciente.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_chat_medico.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_chat_medico.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_alerta_medico.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_alerta_medico.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_medicamentos.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_medicamentos.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_monitoreo.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_monitoreo.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_login.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_login.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_paciente_home.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_paciente_home.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_medicamento.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_medicamento.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_horario.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_horario.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_dashboard_medico.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_dashboard_medico.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_conversacion.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_conversacion.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_historial.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_historial.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/dialog_add_med.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/dialog_add_med.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_paciente_detalle.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_paciente_detalle.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_comorbilidad.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_comorbilidad.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_chat.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_chat.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_msg_recv.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_msg_recv.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_paciente.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_paciente.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_alta_paciente.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_alta_paciente.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_horario.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_horario.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_alerta.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_alerta.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_alertas_medico.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_alertas_medico.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/item_msg_sent.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/item_msg_sent.xml"
+    },
+    {
+        "merged": "mx.ceti.neurodia.app-mergeDebugResources-39:/layout/activity_pacientes.xml",
+        "source": "mx.ceti.neurodia.app-main-42:/layout/activity_pacientes.xml"
+    }
+]
